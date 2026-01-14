@@ -206,7 +206,7 @@ export async function POST(request: Request) {
                 const accentColor = isNewsletter ? '#059669' : (isFreeDiagnosis ? '#2563eb' : '#d97706');
                 const willSyncStibee = isNewsletter || agreeMarketing;
 
-                await resend.emails.send({
+                const resendResult = await resend.emails.send({
                     from: 'CafeDream <onboarding@resend.dev>',
                     to: [process.env.NOTIFICATION_EMAIL || 'yjm3625@gmail.com'],
                     subject: `[카페드림] ${title}: ${name || email.split('@')[0]}님`,
@@ -264,11 +264,15 @@ export async function POST(request: Request) {
                         </div>
                     `
                 });
-                console.log('[Users API] Notification email sent successfully');
+
+                if (resendResult.error) {
+                    console.error('[Users API] Resend detailed error:', resendResult.error);
+                } else {
+                    console.log('[Users API] Notification email sent successfully:', resendResult.data?.id);
+                }
             }
-        } catch (emailError) {
-            console.error('[Users API] Email notification failed:', emailError);
-            // 메일 발송 실패가 전체 프로세스를 중단시키지 않음
+        } catch (emailError: any) {
+            console.error('[Users API] Email notification crash:', emailError.message);
         }
 
         // 스티비 자동 동기화 (뉴스레터 신청 시 또는 전체 신청 시)

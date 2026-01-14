@@ -1,0 +1,4 @@
+﻿{
+  "status": 200,
+  "response": "<!DOCTYPE html>\n<html lang=\"ko\">\n<head>\n\t<meta charset=\"UTF-8\">\n\t<title>湲곕낯 二쇱냼濡?/title>\n\t<style>\n\t\thtml,body {background: #fafafa;}\n\t\t.msg {padding: 100px 0 0 0;text-align: center;}\n\t\t.msg p {font-size: 16px;line-height: 1.6;}\n\t</style>\n</head>\n<body>\n<div class=\"msg\">\n\t<p> ?낅젰?섏떊 ?대찓??二쇱냼(test_diagnostic_1768367941437@example.com)濡??뺤씤 硫붿씪??蹂대궡?쒕졇?듬땲??</p>\n</div>\n</body>\n</html>\n"
+}

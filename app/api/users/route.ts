@@ -201,65 +201,70 @@ export async function POST(request: Request) {
                 const isFreeDiagnosis = source === 'hero_diagnosis' || source === 'header_button' || (source === 'landing_page' && !plan);
                 const isPartnership = !isNewsletter && !isFreeDiagnosis;
 
-                const typeText = isNewsletter ? '뉴스레터 구독' : (isFreeDiagnosis ? '무료 진단' : '파트너십');
-                const title = isNewsletter ? '📧 새로운 뉴스레터 구독' : (isFreeDiagnosis ? '🔍 새로운 무료 진단 신청' : '🤝 새로운 파트너십 신청');
+                const typeName = isNewsletter ? '뉴스레터 구독 신청' : (isFreeDiagnosis ? '무료 진단 신청' : '파트너십/요금제 신청');
                 const accentColor = isNewsletter ? '#059669' : (isFreeDiagnosis ? '#2563eb' : '#d97706');
                 const willSyncStibee = isNewsletter || agreeMarketing;
 
                 const resendResult = await resend.emails.send({
                     from: 'CafeDream <onboarding@resend.dev>',
                     to: [process.env.NOTIFICATION_EMAIL || 'yjm3625@gmail.com'],
-                    subject: `[카페드림] ${title}: ${name || email.split('@')[0]}님`,
+                    subject: `[카페드림] ${typeName}: ${name || email.split('@')[0]}님`,
                     html: `
-                        <div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 20px; border-radius: 10px;">
-                            <h2 style="color: ${accentColor}; border-bottom: 2px solid ${accentColor}; padding-bottom: 10px;">${title} 접수</h2>
-                            <p style="margin-bottom: 20px;">카페드림 랜딩페이지를 통해 새로운 <strong>${typeText}</strong> 신청이 들어왔습니다. 내용을 확인해 주세요.</p>
+                        <div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 25px; border-radius: 12px; border-top: 5px solid ${accentColor};">
+                            <h2 style="color: ${accentColor}; margin-bottom: 20px;">${isNewsletter ? '📧 뉴스레터 구독 접수' : (isFreeDiagnosis ? '🔍 무료 진단 신청 접수' : '🤝 파트너십 신청 접수')}</h2>
+                            <p style="margin-bottom: 25px;">카페드림 랜딩페이지를 통해 새로운 <strong>${isNewsletter ? '뉴스레터 구독' : '서비스 신청'}</strong>이 들어왔습니다. 아래의 상세 내용을 확인해 주세요.</p>
                             
-                            <table style="width: 100%; border-collapse: collapse;">
-                                <tr>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #fafafa; width: 120px;">성함</td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0;">${name || '-'}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #fafafa;">카페/업체명</td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0;">${cafeName || '-'}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #fafafa;">이메일</td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0;">${email}</td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #fafafa;">연락처</td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0;">${phone || '-'}</td>
-                                </tr>
-                                ${isPartnership ? `
-                                <tr>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #fafafa;">선택 플랜</td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0;">${plan || '-'}</td>
-                                </tr>
-                                ` : ''}
-                                 <tr>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #fafafa;">신청 경로</td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0;">
-                                        <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background-color: ${accentColor}1A; color: ${accentColor}; font-weight: bold;">
-                                            ${source === 'newsletter' ? '뉴스레터 구독박스' : (isFreeDiagnosis ? '무료 진단 폼' : '파트너십 신청 폼')}
-                                        </span>
-                                        ${willSyncStibee ? `
-                                        <span style="display: inline-block; padding: 2px 8px; border-radius: 4px; background-color: #f1f5f9; color: #475569; font-size: 0.85em; margin-left: 5px; border: 1px solid #e2e8f0;">
-                                            스티비 자동동기화 대상
-                                        </span>
-                                        ` : ''}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #fafafa;">신청 일시</td>
-                                    <td style="padding: 12px; border-bottom: 1px solid #f0f0f0;">${new Date().toLocaleString('ko-KR')}</td>
-                                </tr>
-                            </table>
+                            <div style="background-color: #fcfcfc; border: 1px solid #f0f0f0; border-radius: 8px; overflow: hidden;">
+                                <table style="width: 100%; border-collapse: collapse;">
+                                    <tr>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #f7f7f7; width: 130px;">성함</td>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0;">${name || '-'}</td>
+                                    </tr>
+                                    ${!isNewsletter ? `
+                                    <tr>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #f7f7f7;">카페/업체명</td>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0;">${cafeName || '-'}</td>
+                                    </tr>
+                                    ` : ''}
+                                    <tr>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #f7f7f7;">이메일</td>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0;"><a href="mailto:${email}" style="color: ${accentColor};">${email}</a></td>
+                                    </tr>
+                                    ${!isNewsletter && (phone || isPartnership) ? `
+                                    <tr>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #f7f7f7;">연락처</td>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0;">${phone || '-'}</td>
+                                    </tr>
+                                    ` : ''}
+                                    ${plan && plan !== 'undefined' ? `
+                                    <tr>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #f7f7f7;">선택 플랜</td>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0;">${plan}</td>
+                                    </tr>
+                                    ` : ''}
+                                    <tr>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #f7f7f7;">신청 경로</td>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0;">
+                                            <span style="display: inline-block; padding: 4px 10px; border-radius: 6px; background-color: ${accentColor}1A; color: ${accentColor}; font-weight: 700; font-size: 13px;">
+                                                ${source === 'newsletter' ? '뉴스레터 구독박스' : (isFreeDiagnosis ? '무료 진단 폼' : '파트너십 신청 폼')}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="padding: 12px 15px; font-weight: bold; background-color: #f7f7f7;">신청 일시</td>
+                                        <td style="padding: 12px 15px;">${new Date().toLocaleString('ko-KR', { timeZone: 'Asia/Seoul', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit' })}</td>
+                                    </tr>
+                                </table>
+                            </div>
                             
-                            <div style="margin-top: 30px; padding: 15px; background-color: #f8fafc; border-radius: 5px; font-size: 0.9em; color: #64748b;">
-                                * 이 메일은 카페드림 시스템에 의해 자동으로 발송되었습니다. <br/>
-                                ${willSyncStibee ? '* 해당 신청자는 스티비 주소록에 자동으로 추가 요청되었습니다. (Double Opt-in 확인 필요)' : '* 빠른 시일 내에 신청 내용을 검토해 주시기 바랍니다.'}
+                            <div style="margin-top: 30px; padding: 20px; background-color: #f8fafc; border-radius: 8px; font-size: 13px; color: #64748b; border-left: 4px solid #cbd5e1;">
+                                <div style="margin-bottom: 8px;"><strong>안내 사항:</strong></div>
+                                <div>* 이 메일은 카페드림 시스템에 의해 신청 즉시 자동으로 발송되었습니다.</div>
+                                <div>${willSyncStibee ? '* 해당 신청자는 스티비 주소록에 추가 요청되었습니다. (스티비 대시보드에서 최종 확인 가능)' : '* 빠른 시일 내에 신청 내용을 검토하여 사장님께 연락하시기 바랍니다.'}</div>
+                            </div>
+                            
+                            <div style="margin-top: 40px; text-align: center; color: #94a3b8; font-size: 12px;">
+                                &copy; 2026 CafeDream. All rights reserved.
                             </div>
                         </div>
                     `

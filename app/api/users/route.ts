@@ -290,7 +290,11 @@ export async function POST(request: Request) {
 
         let detailedMessage = err.message || '알 수 없는 서버 오류';
         if (detailedMessage.includes('fetch failed')) {
-            detailedMessage = `Supabase 연결 대기 중 오류 (fetch failed). URL: ${maskedUrl}. .env.local 설정 후 서버를 재시작해 주세요.`;
+            if (url.includes('placeholder.supabase.co')) {
+                detailedMessage = `Vercel 설정에 Supabase 환경 변수가 등록되지 않았습니다. Vercel Project Settings > Environment Variables에서 NEXT_PUBLIC_SUPABASE_URL과 NEXT_PUBLIC_SUPABASE_ANON_KEY를 추가해 주세요. (현재 placeholder URL 사용 중)`;
+            } else {
+                detailedMessage = `Supabase 연결 대기 중 오류 (fetch failed). URL: ${maskedUrl}. 환경 변수 설정값이 정확한지 확인해 주세요.`;
+            }
         }
 
         return NextResponse.json(

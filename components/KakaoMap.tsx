@@ -155,21 +155,38 @@ export default function KakaoMap({ address = "서울 강남구 강남대로 428"
         }
     }, [initMap]);
 
+    const hasApiKey = !!process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
+
     return (
         <div className={`relative rounded-[3rem] overflow-hidden group shadow-2xl ${className}`}>
             <div ref={mapRef} className="w-full h-full grayscale-[0.3] contrast-[1.1] brightness-[0.9] transition-all group-hover:grayscale-0 group-hover:brightness-100" />
 
             {!mapLoaded && (
                 <div className="absolute inset-0 bg-[#1A110D] flex flex-col items-center justify-center p-8 text-center z-20">
-                    <div className="w-20 h-20 mb-6 bg-amber-600/20 rounded-full flex items-center justify-center animate-pulse">
-                        <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center text-white text-xl">☕</div>
-                    </div>
-                    <p className="text-amber-100/60 text-sm font-black tracking-widest uppercase mb-2">Analyzing Local Market</p>
-                    <div className="flex gap-1">
-                        {[0, 1, 2].map(i => (
-                            <div key={i} className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.2}s` }} />
-                        ))}
-                    </div>
+                    {!hasApiKey ? (
+                        <>
+                            <div className="w-20 h-20 mb-6 bg-red-600/20 rounded-full flex items-center justify-center">
+                                <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center text-white text-xl">⚠️</div>
+                            </div>
+                            <p className="text-red-100/80 text-sm font-bold mb-2">Kakao Map API Key Missing</p>
+                            <p className="text-white/40 text-[10px] leading-relaxed">
+                                Vercel 설정에 NEXT_PUBLIC_KAKAO_MAP_KEY가 없습니다.<br />
+                                환경 변수 등록 후 다시 배포해 주세요.
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <div className="w-20 h-20 mb-6 bg-amber-600/20 rounded-full flex items-center justify-center animate-pulse">
+                                <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center text-white text-xl">☕</div>
+                            </div>
+                            <p className="text-amber-100/60 text-sm font-black tracking-widest uppercase mb-2">Analyzing Local Market</p>
+                            <div className="flex gap-1">
+                                {[0, 1, 2].map(i => (
+                                    <div key={i} className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.2}s` }} />
+                                ))}
+                            </div>
+                        </>
+                    )}
                 </div>
             )}
 

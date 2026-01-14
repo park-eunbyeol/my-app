@@ -18,10 +18,12 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        <Script
-          src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY || 'YOUR_KEY_HERE'}&autoload=false&libraries=services`}
-          strategy="beforeInteractive"
-        />
+        {process.env.NEXT_PUBLIC_KAKAO_MAP_KEY && (
+          <Script
+            src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false&libraries=services`}
+            strategy="beforeInteractive"
+          />
+        )}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link

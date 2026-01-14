@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder_key');
 
 // 스티비 공개 구독 API 엔드포인트 (주소록 466239 전용)
 const STIBEE_PUBLIC_API_URL = "https://stibee.com/api/v1.0/lists/kk3NKQX6RorIi23gl1_fgSoapKIgTg==/public/subscribers";

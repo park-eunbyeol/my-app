@@ -29,7 +29,12 @@ export default function CoffeeShopLanding() {
   const [authData, setAuthData] = useState({ email: '', password: '', confirmPassword: '', name: '' });
   const [authStatus, setAuthStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [authMessage, setAuthMessage] = useState('');
-  const [loggedInUser, setLoggedInUser] = useState<any>(null);
+  interface User {
+    id: string;
+    email: string;
+    name: string | null;
+  }
+  const [loggedInUser, setLoggedInUser] = useState<User | null>(null);
 
   const [scrolled, setScrolled] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
@@ -72,7 +77,7 @@ export default function CoffeeShopLanding() {
         .from('users')
         .select('name')
         .eq('email', email)
-        .maybeSingle();
+        .maybeSingle() as any;
 
       setLoggedInUser({
         id,

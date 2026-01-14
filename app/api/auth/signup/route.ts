@@ -33,10 +33,10 @@ export async function POST(request: Request) {
         if (data.user && name) {
             const { error: dbError } = await supabase
                 .from('users')
-                .insert({
+                .upsert({
                     email: email,
                     name: name
-                } as any);
+                } as any, { onConflict: 'email' });
 
             if (dbError) {
                 console.error('[Signup API] Failed to save user name:', dbError.message);

@@ -18,19 +18,11 @@ export default function RootLayout({
   return (
     <html lang="ko">
       <head>
-        {process.env.NEXT_PUBLIC_KAKAO_MAP_KEY ? (
+        {process.env.NEXT_PUBLIC_KAKAO_MAP_KEY && (
           <Script
-            src={`//dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false&libraries=services`}
+            src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${process.env.NEXT_PUBLIC_KAKAO_MAP_KEY}&autoload=false&libraries=services`}
             strategy="afterInteractive"
-            onReady={() => {
-              console.log('[Layout] Kakao Map SDK Ready');
-            }}
-            onError={(e) => {
-              console.error('[Layout] Kakao Map SDK Load Error:', e);
-            }}
           />
-        ) : (
-          <script dangerouslySetInnerHTML={{ __html: "console.warn('[Layout] NEXT_PUBLIC_KAKAO_MAP_KEY is missing!')" }} />
         )}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

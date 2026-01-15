@@ -159,7 +159,10 @@ export default function KakaoMap({ address = "서울 강남구 강남대로 428"
 
     return (
         <div className={`relative rounded-[3rem] overflow-hidden group shadow-2xl ${className}`}>
-            <div ref={mapRef} className="w-full h-full grayscale-[0.3] contrast-[1.1] brightness-[0.9] transition-all group-hover:grayscale-0 group-hover:brightness-100" />
+            <div
+                ref={mapRef}
+                className={`w-full h-full transition-all duration-700 ${mapLoaded ? 'grayscale-0 opacity-100' : 'grayscale-[0.3] opacity-0'}`}
+            />
 
             {!mapLoaded && (
                 <div className="absolute inset-0 bg-[#1A110D] flex flex-col items-center justify-center p-8 text-center z-20">

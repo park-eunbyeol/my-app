@@ -67,6 +67,9 @@ export default function CoffeeShopLanding() {
 
     initSession();
 
+    // Fallback timer to ensure UI isn't stuck loading
+    const timer = setTimeout(() => setIsInitialAuthCheckDone(true), 2000);
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(`[Auth Event] ${event}`);
       if (session?.user) {
@@ -80,6 +83,7 @@ export default function CoffeeShopLanding() {
     return () => {
       window.removeEventListener('scroll', handleScroll);
       subscription.unsubscribe();
+      clearTimeout(timer);
     };
   }, []);
 
@@ -397,20 +401,19 @@ export default function CoffeeShopLanding() {
                 <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-amber-600 transition-all" />
               </Link>
 
-              {!isInitialAuthCheckDone ? (
-                <div className="flex items-center gap-4 pl-4 border-l border-gray-100">
-                  <div className="w-24 h-4 bg-gray-100 animate-pulse rounded-full" />
-                  <div className="w-20 h-10 bg-gray-100 animate-pulse rounded-full" />
+              {!isInitialAuthCheckDone && !loggedInUser ? (
+                <div className="flex items-center gap-4 pl-4 border-l border-gray-100 opacity-20">
+                  <div className="w-24 h-4 bg-gray-200 rounded-full" />
                 </div>
               ) : loggedInUser ? (
                 <div className="flex items-center gap-6 pl-6 border-l border-gray-100">
                   <div className="flex flex-col items-end">
-                    <span className="text-[13px] font-bold text-gray-400 leading-none mb-1">반갑습니다</span>
+                    <span className="text-[13px] font-bold text-gray-500 leading-none mb-1">반갑습니다</span>
                     <span className="text-[16px] font-black text-amber-900 leading-none">{loggedInUser.name || '김나리'} 사장님</span>
                   </div>
                   <button
                     onClick={handleLogout}
-                    className="px-6 py-2.5 rounded-full bg-gray-50 text-gray-900 text-sm font-bold hover:bg-gray-200 transition-all border border-gray-100 shadow-sm"
+                    className="px-6 py-2.5 rounded-full bg-gray-100 text-gray-900 text-sm font-black hover:bg-gray-200 transition-all border border-gray-200 shadow-sm"
                   >
                     로그아웃
                   </button>

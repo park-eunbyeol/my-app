@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import KakaoMap from '@/components/KakaoMap';
+import TossPaymentWidget from '@/components/TossPaymentWidget';
 import { supabase } from '@/lib/supabase';
 
 export default function CoffeeShopLanding() {
@@ -40,6 +41,9 @@ export default function CoffeeShopLanding() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterStatus, setNewsletterStatus] = useState('');
+  const [showPaymentStep, setShowPaymentStep] = useState(false);
+  const [paymentAmount, setPaymentAmount] = useState(0);
+  const [orderId, setOrderId] = useState('');
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -114,6 +118,15 @@ export default function CoffeeShopLanding() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const getPlanPrice = (planName: string) => {
+    switch (planName) {
+      case '베이직': return 290000;
+      case '프로': return 590000;
+      case '프리미엄': return 990000;
+      default: return 0;
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm()) return;
@@ -141,6 +154,16 @@ export default function CoffeeShopLanding() {
       }
 
       if (response.ok && data.success) {
+        if (selectedPlan) {
+          const price = getPlanPrice(selectedPlan);
+          if (price > 0) {
+            setPaymentAmount(price);
+            setOrderId(data.userId || `order_${Math.random().toString(36).slice(2, 11)}`);
+            setShowPaymentStep(true);
+            return;
+          }
+        }
+
         setSubmitStatus('success');
         setFormData({
           email: '', name: '', phone: '', cafeName: '', plan: '',
@@ -840,6 +863,32 @@ export default function CoffeeShopLanding() {
                 {submitStatus === 'error' && <div className="text-center text-red-600 font-black animate-fadeIn">❌ {submitMessage || '다시 시도해 주세요.'}</div>}
               </form>
             </div>
+
+            {showPaymentStep && (
+              <div className="absolute inset-0 bg-white z-10 animate-fadeIn overflow-y-auto">
+                <div className="p-12">
+                  <button
+                    onClick={() => setShowPaymentStep(false)}
+                    className="mb-8 text-sm font-bold text-gray-400 hover:text-amber-600 transition-colors flex items-center gap-2"
+                  >
+                    ← 뒤로 가기
+                  </button>
+                  <div className="text-center mb-10">
+                    <span className="text-amber-600 text-[10px] font-black uppercase tracking-[0.2em] block mb-2">Final Step</span>
+                    <h2 className="text-3xl font-black text-gray-900 italic">PAYMENT</h2>
+                    <p className="text-gray-400 text-xs font-bold mt-2">안전한 결제를 위해 토스페이먼츠 보안 시스템을 사용합니다.</p>
+                  </div>
+
+                  <TossPaymentWidget
+                    amount={paymentAmount}
+                    orderId={orderId}
+                    orderName={`카페드림 ${selectedPlan} 플랜`}
+                    customerEmail={formData.email}
+                    customerName={formData.name}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -148,14 +148,22 @@ export default function KakaoMap({ address = "서울 강남구 강남대로 428"
         });
     };
 
-    useEffect(() => {
-        if (window.kakao && window.kakao.maps && !initializedRef.current) {
-            initializedRef.current = true;
-            initMap();
-        }
-    }, [initMap]);
-
     const hasApiKey = !!process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
+
+    useEffect(() => {
+        console.log('[KakaoMap] useEffect triggered. hasApiKey:', hasApiKey);
+        if (window.kakao && window.kakao.maps) {
+            console.log('[KakaoMap] window.kakao found. Initializing map...');
+            if (!initializedRef.current) {
+                initializedRef.current = true;
+                initMap();
+            }
+        } else {
+            console.warn('[KakaoMap] window.kakao NOT found. Waiting for script to load...');
+        }
+    }, [initMap, hasApiKey]);
+
+
 
     return (
         <div className={`relative rounded-[3rem] overflow-hidden group shadow-2xl ${className}`}>

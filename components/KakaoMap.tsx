@@ -20,9 +20,14 @@ export default function KakaoMap({ address = "서울 강남구 강남대로 428"
     const [mapLoaded, setMapLoaded] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [competitorCount, setCompetitorCount] = useState(0);
+    const [mounted, setMounted] = useState(false);
     const initializedRef = useRef(false);
     const markersRef = useRef<any[]>([]);
     const shopMarkerRef = useRef<any>(null);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const searchCompetitors = useCallback((map: any, position: any) => {
         if (!window.kakao || !window.kakao.maps.services) return;
@@ -151,19 +156,43 @@ export default function KakaoMap({ address = "서울 강남구 강남대로 428"
     const hasApiKey = !!process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
 
     useEffect(() => {
-        console.log('[KakaoMap] useEffect triggered. hasApiKey:', hasApiKey);
-        if (window.kakao && window.kakao.maps) {
-            console.log('[KakaoMap] window.kakao found. Initializing map...');
-            if (!initializedRef.current) {
-                initializedRef.current = true;
-                initMap();
+        if (!mounted) return; // Hydration guard
+
+        const checkKakao = () => {
+            if (window.kakao && window.kakao.maps) {
+                console.log('[KakaoMap] window.kakao ready. Initializing...');
+                if (!initializedRef.current) {
+                    initializedRef.current = true;
+                    initMap();
+                }
+                return true;
             }
-        } else {
-            console.warn('[KakaoMap] window.kakao NOT found. Waiting for script to load...');
+            return false;
+        };
+
+        if (!checkKakao()) {
+            console.warn('[KakaoMap] kakao not ready, starting intervals...');
+            const interval = setInterval(() => {
+                if (checkKakao()) clearInterval(interval);
+            }, 500);
+
+            const timeout = setTimeout(() => {
+                clearInterval(interval);
+                if (!initializedRef.current) {
+                    console.error('[KakaoMap] initialization failed after 5s timeout');
+                }
+            }, 5000);
+
+            return () => {
+                clearInterval(interval);
+                clearTimeout(timeout);
+            };
         }
-    }, [initMap, hasApiKey]);
+    }, [initMap, mounted]); // Added mounted to dependency array
 
 
+
+    if (!mounted) return <div className={`bg-[#1A110D] rounded-[3rem] ${className}`} />;
 
     return (
         <div className={`relative rounded-[3rem] overflow-hidden group shadow-2xl ${className}`}>

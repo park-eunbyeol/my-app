@@ -379,35 +379,38 @@ export default function CoffeeShopLanding() {
       {/* Navigation */}
       <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${scrolled ? 'py-4' : 'py-8'}`}>
         <div className="max-w-7xl mx-auto px-6">
-          <div className={`flex items-center justify-between px-8 py-4 rounded-full transition-all duration-500 ${scrolled ? 'glass shadow-xl' : 'bg-transparent'}`}>
-            <div className="flex items-center gap-3">
-              <span className="text-3xl animate-bounce">☕</span>
-              <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-amber-900 to-orange-700 bg-clip-text text-transparent italic">CAFÉ DREAM</span>
+          <div className={`flex items-center justify-between px-6 md:px-12 py-4 rounded-full transition-all duration-500 ${scrolled ? 'glass shadow-xl' : 'bg-transparent'}`}>
+            <div className="flex items-center gap-3 md:gap-4">
+              <span className="text-2xl md:text-4xl animate-bounce">☕</span>
+              <span className="text-xl md:text-3xl font-black tracking-[calc(-0.05em)] bg-gradient-to-r from-amber-900 via-orange-800 to-amber-900 bg-clip-text text-transparent italic drop-shadow-sm pr-2">CAFÉ DREAM</span>
             </div>
 
-            <div className="hidden md:flex items-center gap-10">
+            <div className="hidden md:flex items-center gap-12">
               {['서비스', '요금제'].map((item) => (
-                <a key={item} href={`#${item}`} className="text-sm font-bold text-gray-600 hover:text-amber-800 transition-colors relative group">
+                <a key={item} href={`#${item}`} className="text-[15px] font-bold text-gray-700 hover:text-amber-800 transition-colors relative group">
                   {item}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-amber-600 transition-all group-hover:w-full" />
                 </a>
               ))}
-              <Link href="/dashboard" className="text-sm font-bold text-amber-600 hover:text-amber-800 transition-colors relative group">
+              <Link href="/dashboard" className="text-[15px] font-black text-amber-600 hover:text-amber-800 transition-colors relative group">
                 대시보드
-                <span className="absolute -bottom-1 left-0 w-1/2 h-0.5 bg-amber-600 transition-all group-hover:w-full" />
+                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-amber-600 transition-all" />
               </Link>
 
               {!isInitialAuthCheckDone ? (
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 pl-4 border-l border-gray-100">
                   <div className="w-24 h-4 bg-gray-100 animate-pulse rounded-full" />
                   <div className="w-20 h-10 bg-gray-100 animate-pulse rounded-full" />
                 </div>
               ) : loggedInUser ? (
-                <div className="flex items-center gap-4">
-                  <span className="text-sm font-black text-amber-900">{loggedInUser.name || '김나리'} 사장님</span>
+                <div className="flex items-center gap-6 pl-6 border-l border-gray-100">
+                  <div className="flex flex-col items-end">
+                    <span className="text-[13px] font-bold text-gray-400 leading-none mb-1">반갑습니다</span>
+                    <span className="text-[16px] font-black text-amber-900 leading-none">{loggedInUser.name || '김나리'} 사장님</span>
+                  </div>
                   <button
                     onClick={handleLogout}
-                    className="px-6 py-2.5 rounded-full bg-gray-100 text-gray-900 text-sm font-bold hover:bg-gray-200 transition-all"
+                    className="px-6 py-2.5 rounded-full bg-gray-50 text-gray-900 text-sm font-bold hover:bg-gray-200 transition-all border border-gray-100 shadow-sm"
                   >
                     로그아웃
                   </button>
@@ -509,9 +512,9 @@ export default function CoffeeShopLanding() {
             <span className="text-sm font-bold text-amber-900 uppercase tracking-widest leading-none">이달의 무료 체험 혜택 종료 임박</span>
           </div>
 
-          <h1 className="text-4xl md:text-7xl font-extrabold leading-[1.2] md:leading-[1.15] tracking-tight mb-8 animate-fadeIn">
-            텅 빈 테이블을<br />
-            <span className="text-amber-600">웨이팅 라인</span>으로 만드는<br />
+          <h1 className="text-3xl sm:text-4xl md:text-7xl font-extrabold leading-[1.2] md:leading-[1.15] tracking-tighter mb-8 animate-fadeIn text-balance">
+            텅 빈 테이블을<br className="hidden md:block" />
+            <span className="text-amber-600">웨이팅 라인</span>으로 만드는<br className="hidden md:block" />
             <span className="text-gray-900">단골 마케팅의 정석</span>
           </h1>
 
@@ -554,9 +557,9 @@ export default function CoffeeShopLanding() {
       <section className="py-20 md:py-32 px-6 bg-[#0F0A08] text-white overflow-hidden relative">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 md:gap-24 items-center">
           <div className="animate-fadeIn">
-            <h2 className="text-4xl md:text-5xl font-black mb-10 leading-tight">
-              맛있는 커피,<br />
-              <span className="text-amber-500">부족한 방문객</span><br />
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-10 leading-tight tracking-tighter text-balance">
+              맛있는 커피,<br className="hidden md:block" />
+              <span className="text-amber-500">부족한 방문객</span><br className="hidden md:block" />
               무엇이 문제일까요?
             </h2>
             <div className="space-y-4">
@@ -641,7 +644,7 @@ export default function CoffeeShopLanding() {
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
             <span className="text-amber-600 text-xs font-black uppercase tracking-[0.3em] block mb-4">Loyalty Recipe</span>
-            <h2 className="text-4xl md:text-5xl font-black mb-6">손님이 단골이 되는<br />카페드림의 3단계 레시피</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 tracking-tighter text-balance">손님이 단골이 되는<br className="hidden md:block" />카페드림의 3단계 레시피</h2>
             <p className="text-gray-500 font-bold max-w-2xl mx-auto">더 이상 손님이 오기만을 기다리지 마세요. 카페드림이 직접 손님의 발걸음을 돌립니다.</p>
           </div>
 
@@ -692,8 +695,8 @@ export default function CoffeeShopLanding() {
           <div className="flex flex-col lg:flex-row items-center gap-12 md:gap-20">
             <div className="lg:w-1/2">
               <span className="text-amber-600 text-xs font-black uppercase tracking-[0.3em] block mb-4">Life Transformation</span>
-              <h2 className="text-4xl md:text-5xl font-black mb-8 leading-tight">
-                사장님의 24시간이<br />
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-8 leading-tight tracking-tighter text-balance">
+                사장님의 24시간이<br className="hidden md:block" />
                 <span className="text-amber-600">완전히 달라집니다</span>
               </h2>
               <p className="text-gray-500 font-bold text-lg mb-10 leading-relaxed">
@@ -779,7 +782,7 @@ export default function CoffeeShopLanding() {
       <section id="서비스" className="py-20 md:py-32 bg-[#F2EDE7]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
-            <h2 className="text-4xl md:text-5xl font-black mb-6">맞춤형 마케팅 솔루션</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 tracking-tighter text-balance">맞춤형 마케팅 솔루션</h2>
             <p className="text-amber-900/60 font-bold uppercase tracking-widest text-sm">Every tool you need for growth</p>
           </div>
 
@@ -808,7 +811,7 @@ export default function CoffeeShopLanding() {
       <section id="요금제" className="py-20 md:py-32 bg-[#F2EDE7]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16 md:mb-20">
-            <h2 className="text-4xl md:text-5xl font-black mb-6">합리적인 요금제</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 tracking-tighter text-balance">합리적인 요금제</h2>
             <p className="text-gray-500 font-bold">규모에 최적화된 성장을 선택하세요</p>
           </div>
 
@@ -837,7 +840,7 @@ export default function CoffeeShopLanding() {
       <section className="py-20 md:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-16 md:mb-20">
-            <h2 className="text-4xl md:text-5xl font-black mb-6">성공 파트너 스토리</h2>
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 tracking-tighter text-balance">성공 파트너 스토리</h2>
             <p className="text-lg md:text-xl text-gray-400 font-bold">마케팅 하나로 바뀐 기적 같은 일상</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
@@ -926,8 +929,8 @@ export default function CoffeeShopLanding() {
             <span className="text-white/60 text-[10px] font-black uppercase tracking-widest leading-none">원두의 향기, 사장님의 진심에만 집중하세요</span>
           </div>
 
-          <h2 className="text-4xl md:text-6xl font-black text-white mb-8 leading-[1.2]">
-            사장님의 카페가 누군가의<br />
+          <h2 className="text-3xl sm:text-4xl md:text-6xl font-black text-white mb-8 leading-[1.2] tracking-tighter text-balance">
+            사장님의 카페가 누군가의<br className="hidden md:block" />
             <span className="text-amber-500">인생 단골집</span>이 되도록.
           </h2>
 
@@ -1078,7 +1081,7 @@ export default function CoffeeShopLanding() {
                 <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-inner">
                   {authMode === 'login' ? '🔑' : authMode === 'signup' ? '📝' : '👤'}
                 </div>
-                <h2 className="text-2xl font-black text-gray-900 italic tracking-tighter">CAFÉ DREAM</h2>
+                <h2 className="text-xl md:text-2xl font-black text-gray-900 italic tracking-tighter">CAFÉ DREAM</h2>
                 <p className="text-gray-400 text-[10px] md:text-xs font-bold mt-1">
                   {authMode === 'login' ? '다시 오신 것을 환영합니다!' : authMode === 'signup' ? '새로운 시작을 함께하세요' : '이미 250명의 사장님들과 함께하고 있습니다.'}
                 </p>
@@ -1174,7 +1177,7 @@ export default function CoffeeShopLanding() {
       {/* Footer */}
       <footer className="py-20 bg-white border-t border-gray-100">
         <div className="max-w-7xl mx-auto px-6 text-center">
-          <p className="text-2xl font-black italic mb-4 tracking-tighter">CAFÉ DREAM</p>
+          <p className="text-xl md:text-2xl font-black italic mb-4 tracking-tighter">CAFÉ DREAM</p>
           <p className="text-gray-400 font-bold text-sm">© 2024 Café Dream. All rights reserved.</p>
         </div>
       </footer>

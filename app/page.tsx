@@ -45,6 +45,7 @@ export default function CoffeeShopLanding() {
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [orderId, setOrderId] = useState('');
   const [isInitialAuthCheckDone, setIsInitialAuthCheckDone] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -428,8 +429,76 @@ export default function CoffeeShopLanding() {
                 </>
               )}
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="md:hidden w-12 h-12 flex items-center justify-center rounded-full bg-white/50 backdrop-blur-md shadow-sm text-2xl"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            >
+              {isMobileMenuOpen ? '✕' : '☰'}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu Overlay */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden fixed inset-0 top-24 z-40 px-6 animate-fadeIn">
+            <div className="bg-white/90 backdrop-blur-2xl rounded-[3rem] shadow-2xl border border-gray-100 p-10 flex flex-col gap-8 shadow-amber-900/10">
+              <div className="flex flex-col gap-6">
+                {['서비스', '요금제'].map((item) => (
+                  <a
+                    key={item}
+                    href={`#${item}`}
+                    className="text-2xl font-black text-gray-900"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                  >
+                    {item}
+                  </a>
+                ))}
+                <Link
+                  href="/dashboard"
+                  className="text-2xl font-black text-amber-600"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  대시보드
+                </Link>
+              </div>
+
+              <div className="h-px bg-gray-100 w-full" />
+
+              <div className="flex flex-col gap-4">
+                {!isInitialAuthCheckDone ? (
+                  <div className="w-full h-12 bg-gray-100 animate-pulse rounded-2xl" />
+                ) : loggedInUser ? (
+                  <div className="flex flex-col gap-4">
+                    <span className="text-lg font-black text-amber-900">{loggedInUser.name || '김나리'} 사장님</span>
+                    <button
+                      onClick={() => { handleLogout(); setIsMobileMenuOpen(false); }}
+                      className="w-full py-4 rounded-2xl bg-gray-100 text-gray-900 font-bold"
+                    >
+                      로그아웃
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => { openAuthModal('selection'); setIsMobileMenuOpen(false); }}
+                      className="w-full py-4 rounded-2xl bg-gray-100 text-gray-900 font-black"
+                    >
+                      로그인
+                    </button>
+                    <button
+                      onClick={() => { setShowNewsletterModal(true); setIsMobileMenuOpen(false); }}
+                      className="w-full py-5 rounded-2xl bg-amber-600 text-white font-black text-lg shadow-xl shadow-amber-900/20"
+                    >
+                      무료 구독 신청
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
@@ -440,33 +509,33 @@ export default function CoffeeShopLanding() {
             <span className="text-sm font-bold text-amber-900 uppercase tracking-widest leading-none">이달의 무료 체험 혜택 종료 임박</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-extrabold leading-[1.15] tracking-tight mb-8 animate-fadeIn">
+          <h1 className="text-4xl md:text-7xl font-extrabold leading-[1.2] md:leading-[1.15] tracking-tight mb-8 animate-fadeIn">
             텅 빈 테이블을<br />
             <span className="text-amber-600">웨이팅 라인</span>으로 만드는<br />
             <span className="text-gray-900">단골 마케팅의 정석</span>
           </h1>
 
-          <p className="text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed mb-12 animate-fadeIn" style={{ animationDelay: '0.1s' }}>
+          <p className="text-lg md:text-xl text-gray-500 max-w-2xl mx-auto leading-relaxed mb-12 animate-fadeIn px-4 md:px-0" style={{ animationDelay: '0.1s' }}>
             우리 동네 사람들에게 내 카페를 알리는 가장 확실한 방법.
-            <span className="text-amber-700 font-bold underline decoration-amber-200 underline-offset-8">지도 노출부터 단골 관리까지</span>,
+            <span className="md:block mt-1 text-amber-700 font-bold underline decoration-amber-200 underline-offset-8">지도 노출부터 단골 관리까지</span>,
             사장님은 커피만 내리세요. 손님은 저희가 모셔옵니다.
           </p>
 
           <div className="max-w-xl mx-auto animate-fadeIn" style={{ animationDelay: '0.2s' }}>
-            <div className="flex flex-col sm:flex-row gap-3 p-2 bg-white rounded-3xl shadow-2xl border border-gray-100">
-              <div className="flex-1 flex items-center px-6">
-                <span className="text-amber-500 mr-3">📍</span>
+            <div className="flex flex-col sm:flex-row gap-3 p-3 bg-white rounded-3xl shadow-2xl border border-gray-100">
+              <div className="flex-1 flex items-center px-4 md:px-6">
+                <span className="text-amber-500 mr-2 md:mr-3">📍</span>
                 <input
                   type="text"
-                  placeholder="카페 이름과 지역을 입력하세요"
-                  className="w-full py-4 bg-transparent focus:outline-none text-lg font-medium"
+                  placeholder="카페 이름과 지역"
+                  className="w-full py-4 bg-transparent focus:outline-none text-base md:text-lg font-medium"
                   onFocus={() => openSubscriptionModal(null, 'hero_diagnosis')}
                   readOnly
                 />
               </div>
               <button
                 onClick={() => openSubscriptionModal(null, 'hero_diagnosis')}
-                className="px-10 py-4 rounded-2xl bg-amber-600 text-white font-black text-lg hover:bg-amber-700 transition-all shadow-xl hover:shadow-amber-300/30 active:scale-95 whitespace-nowrap"
+                className="w-full sm:w-auto px-10 py-4 rounded-xl md:rounded-2xl bg-amber-600 text-white font-black text-lg hover:bg-amber-700 transition-all shadow-xl hover:shadow-amber-300/30 active:scale-95 whitespace-nowrap"
               >
                 무료 진단 받기
               </button>
@@ -479,11 +548,11 @@ export default function CoffeeShopLanding() {
             </div>
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Pain Point Section */}
-      <section className="py-32 px-6 bg-[#0F0A08] text-white overflow-hidden relative">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-24 items-center">
+      <section className="py-20 md:py-32 px-6 bg-[#0F0A08] text-white overflow-hidden relative">
+        <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 md:gap-24 items-center">
           <div className="animate-fadeIn">
             <h2 className="text-4xl md:text-5xl font-black mb-10 leading-tight">
               맛있는 커피,<br />
@@ -547,7 +616,7 @@ export default function CoffeeShopLanding() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-24 bg-white">
+      <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-6 text-center">
           <div className="text-xs font-black text-amber-600 uppercase tracking-[0.3em] mb-4">Proven with Numbers</div>
           <h2 className="text-3xl md:text-4xl font-black mb-16">이미 250명의 사장님들이 카페드림을 선택했습니다.</h2>
@@ -567,9 +636,8 @@ export default function CoffeeShopLanding() {
         </div>
       </section>
 
-
       {/* CRM Roadmap Section */}
-      <section className="py-32 bg-[#FAF7F2] overflow-hidden">
+      <section className="py-20 md:py-32 bg-[#FAF7F2] overflow-hidden">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
             <span className="text-amber-600 text-xs font-black uppercase tracking-[0.3em] block mb-4">Loyalty Recipe</span>
@@ -601,7 +669,7 @@ export default function CoffeeShopLanding() {
                 detail: '객단가 28% 증가'
               }
             ].map((item, idx) => (
-              <div key={idx} className="relative z-10 p-10 rounded-[3rem] bg-white shadow-xl shadow-amber-900/5 hover:-translate-y-4 transition-all duration-500 group">
+              <div key={idx} className="relative z-10 p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] bg-white shadow-xl shadow-amber-900/5 hover:-translate-y-4 transition-all duration-500 group">
                 <div className="w-20 h-20 rounded-3xl bg-amber-50 flex items-center justify-center text-4xl mb-8 group-hover:scale-110 group-hover:bg-amber-100 transition-all duration-500 shadow-inner">
                   {item.icon}
                 </div>
@@ -619,9 +687,9 @@ export default function CoffeeShopLanding() {
       </section>
 
       {/* Owner's 24-Hour Timeline Section */}
-      <section className="py-32 bg-white relative">
+      <section className="py-20 md:py-32 bg-white relative">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col lg:flex-row items-center gap-20">
+          <div className="flex flex-col lg:flex-row items-center gap-12 md:gap-20">
             <div className="lg:w-1/2">
               <span className="text-amber-600 text-xs font-black uppercase tracking-[0.3em] block mb-4">Life Transformation</span>
               <h2 className="text-4xl md:text-5xl font-black mb-8 leading-tight">
@@ -654,9 +722,9 @@ export default function CoffeeShopLanding() {
               </div>
             </div>
 
-            <div className="lg:w-1/2 relative">
+            <div className="lg:w-1/2 relative w-full">
               <div className="absolute inset-0 bg-amber-100/50 rounded-full blur-[100px] -z-10 animate-pulse"></div>
-              <div className="relative p-10 bg-[#1A110D] rounded-[4rem] shadow-3xl border border-white/5 overflow-hidden">
+              <div className="relative p-6 md:p-10 bg-[#1A110D] rounded-[3rem] md:rounded-[4rem] shadow-3xl border border-white/5 overflow-hidden">
                 <div className="flex justify-between items-center mb-10">
                   <h4 className="text-white font-black text-xl italic uppercase tracking-widest">Time Saved</h4>
                   <div className="px-4 py-2 bg-amber-500 text-white text-xs font-black rounded-full shadow-lg">주당 25시간 절약</div>
@@ -708,7 +776,7 @@ export default function CoffeeShopLanding() {
       </section>
 
       {/* Services Section */}
-      <section id="서비스" className="py-32 bg-[#F2EDE7]">
+      <section id="서비스" className="py-20 md:py-32 bg-[#F2EDE7]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
             <h2 className="text-4xl md:text-5xl font-black mb-6">맞춤형 마케팅 솔루션</h2>
@@ -724,7 +792,7 @@ export default function CoffeeShopLanding() {
               { title: '카카오 예약/채널 관리', desc: '카카오톡을 통해 손쉽게 예약하고 주문할 수 있는 원스톱 시스템을 구축합니다.', icon: '💬', color: 'bg-yellow-400/20' },
               { title: '로컬 체험단 운영', desc: '활동이 활발한 지역 블로거들을 섭외하여 자연스러운 입소문을 만듭니다.', icon: '🏆', color: 'bg-pink-100' }
             ].map((s, idx) => (
-              <div key={idx} className="p-10 rounded-[3rem] bg-white shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
+              <div key={idx} className="p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] bg-white shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
                 <div className={`w-14 h-14 rounded-2xl ${s.color} flex items-center justify-center text-3xl mb-8 group-hover:scale-125 transition-transform duration-500`}>
                   {s.icon}
                 </div>
@@ -734,23 +802,23 @@ export default function CoffeeShopLanding() {
             ))}
           </div>
         </div>
-      </section>
+      </section >
 
       {/* Pricing Section */}
-      <section id="요금제" className="py-32 bg-[#F2EDE7]">
+      <section id="요금제" className="py-20 md:py-32 bg-[#F2EDE7]">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
+          <div className="text-center mb-16 md:mb-20">
             <h2 className="text-4xl md:text-5xl font-black mb-6">합리적인 요금제</h2>
             <p className="text-gray-500 font-bold">규모에 최적화된 성장을 선택하세요</p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { name: '베이직', price: '39,000' },
               { name: '프로', price: '89,000', popular: true },
               { name: '프리미엄', price: '159,000' }
             ].map((plan, i) => (
-              <div key={i} className={`p-10 rounded-[3rem] transition-all duration-500 ${plan.popular ? 'bg-amber-600 text-white shadow-2xl scale-105 z-10' : 'bg-white shadow-xl'}`}>
+              <div key={i} className={`p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] transition-all duration-500 ${plan.popular ? 'bg-amber-600 text-white shadow-2xl md:scale-105 z-10' : 'bg-white shadow-xl'}`}>
                 <h3 className="text-2xl font-black mb-2">{plan.name}</h3>
                 <div className="text-4xl font-black mb-8">₩{plan.price}<span className="text-sm opacity-50">/월</span></div>
                 <button
@@ -766,19 +834,19 @@ export default function CoffeeShopLanding() {
       </section>
 
       {/* Success Stories Section */}
-      <section className="py-32 bg-white">
+      <section className="py-20 md:py-32 bg-white">
         <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20">
-            <h2 className="text-5xl font-black mb-6">성공 파트너 스토리</h2>
-            <p className="text-xl text-gray-400 font-bold">마케팅 하나로 바뀐 기적 같은 일상</p>
+          <div className="text-center mb-16 md:mb-20">
+            <h2 className="text-4xl md:text-5xl font-black mb-6">성공 파트너 스토리</h2>
+            <p className="text-lg md:text-xl text-gray-400 font-bold">마케팅 하나로 바뀐 기적 같은 일상</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10">
             {[
               { name: '카페 아우라', location: '서울 강남', review: '네이버 플레이스 50위권에서 마케팅 2주 만에 3위로 올라섰습니다. 지금은 주말마다 줄을 서요.', image: '☕' },
               { name: '로코 커피', location: '경기 고양', review: 'SNS 광고 관리를 맡긴 후로 20대 단골이 300% 늘었습니다. 사장인 저보다 제 카페를 더 잘 알아요.', image: '🥯' },
               { name: '그린 팩토리', location: '인천 송도', review: '한 달 무료 체험만 해보려다 연간 계약까지 했습니다. 쿠폰 시스템 덕분에 재방문율이 눈에 띄게 올랐어요.', image: '🍰' }
             ].map((story, i) => (
-              <div key={i} className="p-10 rounded-[40px] bg-[#F9F9F9] border border-gray-100 relative group transition-all hover:bg-white hover:shadow-2xl hover:-translate-y-2">
+              <div key={i} className="p-8 md:p-10 rounded-[2.5rem] md:rounded-[40px] bg-[#F9F9F9] border border-gray-100 relative group transition-all hover:bg-white hover:shadow-2xl hover:-translate-y-2">
                 <div className="text-4xl mb-6">{story.image}</div>
                 <p className="text-lg font-bold text-gray-700 leading-relaxed mb-8 italic">"{story.review}"</p>
                 <div className="flex items-center gap-4">
@@ -795,7 +863,7 @@ export default function CoffeeShopLanding() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-32 bg-[#F2EDE7]">
+      <section className="py-20 md:py-32 bg-[#F2EDE7]">
         <div className="max-w-3xl mx-auto px-6">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-black mb-4">자주 묻는 질문</h2>
@@ -807,7 +875,7 @@ export default function CoffeeShopLanding() {
               { q: '1개월 무료 제험은 정말 무료인가요?', a: '네, 약정이나 위약금 없이 1개월간 모든 프리미엄 기능을 직접 경험해보실 수 있습니다.' },
               { q: '이미 다른 업체 마케팅을 쓰고 있는데 괜찮을까요?', a: '진단 서비스를 통해 현재 어떤 부분이 부족한지 무료로 분석해 드립니다. 효과가 없다면 갈아타실 때가 되었습니다.' }
             ].map((faq, i) => (
-              <div key={i} className="p-8 rounded-[2rem] bg-white shadow-sm">
+              <div key={i} className="p-6 md:p-8 rounded-[2rem] bg-white shadow-sm">
                 <div className="text-lg font-black mb-2 text-amber-900">Q. {faq.q}</div>
                 <p className="text-gray-500 font-medium tracking-tight">A. {faq.a}</p>
               </div>
@@ -817,9 +885,9 @@ export default function CoffeeShopLanding() {
       </section>
 
       {/* Newsletter Section */}
-      <section className="py-24 bg-[#FAFAFA]">
+      <section className="py-20 bg-[#FAFAFA]">
         <div className="max-w-4xl mx-auto px-6">
-          <div className="bg-amber-600 rounded-[3rem] p-12 text-center text-white relative overflow-hidden">
+          <div className="bg-amber-600 rounded-[2.5rem] md:rounded-[3rem] p-8 md:p-16 text-center text-white relative overflow-hidden">
             <div className="relative z-10">
               <h2 className="text-3xl md:text-4xl font-black mb-6">성장하는 카페의 비밀, 뉴스레터</h2>
               <p className="text-amber-100 font-bold mb-10 opacity-80 leading-relaxed">매주 화요일, 사장님의 매출을 바꿔줄 실전 데이터와 트렌드를 무료로 보내드립니다.</p>
@@ -829,13 +897,13 @@ export default function CoffeeShopLanding() {
                   placeholder="이메일을 입력하세요"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
-                  className="flex-1 px-8 py-5 rounded-2xl bg-white text-gray-900 font-bold focus:outline-none"
+                  className="w-full sm:flex-1 px-8 py-5 rounded-2xl bg-white text-gray-900 font-bold focus:outline-none"
                   required
                 />
                 <button
                   type="submit"
                   disabled={newsletterStatus === 'loading'}
-                  className="px-8 py-5 rounded-2xl bg-amber-900 text-white font-black hover:bg-[#1A110D] transition-all shadow-xl disabled:opacity-50"
+                  className="w-full sm:w-auto px-8 py-5 rounded-2xl bg-amber-900 text-white font-black hover:bg-[#1A110D] transition-all shadow-xl disabled:opacity-50"
                 >
                   {newsletterStatus === 'loading' ? '처리 중...' : '무료 구독하기'}
                 </button>
@@ -848,7 +916,7 @@ export default function CoffeeShopLanding() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-32 bg-[#1A110D] relative overflow-hidden">
+      <section className="py-20 md:py-32 bg-[#1A110D] relative overflow-hidden">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-amber-600/10 rounded-full blur-[120px]"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-amber-900/20 rounded-full blur-[120px]"></div>
 
@@ -858,24 +926,24 @@ export default function CoffeeShopLanding() {
             <span className="text-white/60 text-[10px] font-black uppercase tracking-widest leading-none">원두의 향기, 사장님의 진심에만 집중하세요</span>
           </div>
 
-          <h2 className="text-4xl md:text-6xl font-black text-white mb-8 leading-tight">
+          <h2 className="text-4xl md:text-6xl font-black text-white mb-8 leading-[1.2]">
             사장님의 카페가 누군가의<br />
             <span className="text-amber-500">인생 단골집</span>이 되도록.
           </h2>
 
-          <p className="text-gray-400 text-xl font-bold mb-12 max-w-2xl mx-auto leading-relaxed">
-            마케팅 걱정은 저희가 가져가겠습니다. 사장님은 그저 맛있는 커피만<br />
-            준비해 주세요. <span className="text-white">1개월 무료 체험</span>으로 지금 바로 파트너십을 시작해 보세요.
+          <p className="text-gray-400 text-lg md:text-xl font-bold mb-12 max-w-2xl mx-auto leading-relaxed">
+            마케팅 걱정은 저희가 가져가겠습니다. 사장님은 그저 맛있는 커피만 준비해 주세요.
+            <span className="block mt-2 text-white">1개월 무료 체험으로 지금 바로 시작해 보세요.</span>
           </p>
 
           <div className="flex flex-col items-center gap-8">
             <button
               onClick={() => openSubscriptionModal(null, 'final_cta')}
-              className="px-12 py-7 rounded-[2.5rem] bg-amber-600 text-white font-black text-2xl hover:bg-amber-700 transition-all shadow-3xl shadow-amber-600/20 hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto px-10 md:px-12 py-6 md:py-7 rounded-[2rem] md:rounded-[2.5rem] bg-amber-600 text-white font-black text-xl md:text-2xl hover:bg-amber-700 transition-all shadow-3xl shadow-amber-600/20 hover:scale-105 active:scale-95"
             >
               무료로 파트너십 시작하기
             </button>
-            <p className="text-gray-500 text-sm font-bold">
+            <p className="text-gray-500 text-[10px] md:text-sm font-bold">
               * 카드 등록 및 복잡한 계약 절차 없이 0원에 시작할 수 있습니다.
             </p>
           </div>
@@ -884,12 +952,12 @@ export default function CoffeeShopLanding() {
 
       {/* Subscription Modal */}
       {showSubscriptionModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 glass animate-fadeIn" onClick={() => setShowSubscriptionModal(false)}>
-          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto relative animate-modalFadeIn" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setShowSubscriptionModal(false)} className="absolute top-8 right-8 text-3xl font-light text-gray-400 hover:text-black transition-colors">×</button>
-            <div className="p-12">
-              <h2 className="text-3xl font-black text-center mb-10">{selectedPlan ? `[${selectedPlan}] 플랜 신청` : '무료 진단 신청'}</h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 glass animate-fadeIn" onClick={() => setShowSubscriptionModal(false)}>
+          <div className="bg-white rounded-[2.5rem] md:rounded-[40px] shadow-2xl w-full max-w-2xl max-h-[95vh] md:max-h-[90vh] overflow-y-auto relative animate-modalFadeIn" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setShowSubscriptionModal(false)} className="absolute top-6 right-6 md:top-8 md:right-8 text-3xl font-light text-gray-400 hover:text-black transition-colors z-20">×</button>
+            <div className="p-8 md:p-12">
+              <h2 className="text-2xl md:text-3xl font-black text-center mb-8 md:mb-10">{selectedPlan ? `[${selectedPlan}] 플랜 신청` : '무료 진단 신청'}</h2>
+              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {['cafeName', 'name', 'email', 'phone'].map(field => (
                     <div key={field}>
@@ -899,13 +967,13 @@ export default function CoffeeShopLanding() {
                         placeholder={field === 'cafeName' ? '카페명' : field === 'name' ? '성함' : field === 'email' ? '이메일' : '연락처'}
                         value={(formData as any)[field]}
                         onChange={handleInputChange}
-                        className={`w-full px-6 py-4 rounded-2xl bg-gray-50 border-2 transition-all focus:outline-none ${errors[field] ? 'border-red-200' : 'border-transparent focus:border-amber-200'}`}
+                        className={`w-full px-6 py-4 rounded-xl md:rounded-2xl bg-gray-50 border-2 transition-all focus:outline-none ${errors[field] ? 'border-red-200' : 'border-transparent focus:border-amber-200'}`}
                       />
                       {errors[field] && <p className="mt-1 text-[10px] text-red-500 font-bold px-2">{errors[field]}</p>}
                     </div>
                   ))}
                 </div>
-                <div className="p-6 rounded-3xl bg-amber-50 border border-amber-100">
+                <div className="p-6 rounded-2xl md:rounded-3xl bg-amber-50 border border-amber-100">
                   <div className="flex items-center gap-3">
                     <input type="checkbox" name="agreePrivacy" checked={formData.agreePrivacy} onChange={handleInputChange} className="w-5 h-5 accent-amber-600" id="agree" />
                     <label htmlFor="agree" className="text-sm font-bold text-amber-900/70">개인정보 수집 및 이용 동의 (필수)</label>
@@ -914,18 +982,18 @@ export default function CoffeeShopLanding() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full py-5 rounded-2xl bg-amber-600 text-white font-black text-xl hover:bg-amber-700 transition-all shadow-xl active:scale-95 disabled:opacity-50"
+                  className="w-full py-5 rounded-xl md:rounded-2xl bg-amber-600 text-white font-black text-lg md:text-xl hover:bg-amber-700 transition-all shadow-xl active:scale-95 disabled:opacity-50"
                 >
                   {isSubmitting ? '처리 중...' : '신청하기'}
                 </button>
                 {submitStatus === 'success' && <div className="text-center text-green-600 font-black animate-fadeIn">🎉 신청이 완료되었습니다!</div>}
-                {submitStatus === 'error' && <div className="text-center text-red-600 font-black animate-fadeIn">❌ {submitMessage || '다시 시도해 주세요.'}</div>}
+                {submitStatus === 'error' && <div className="text-center text-red-600 font-black animate-fadeIn text-sm">❌ {submitMessage || '다시 시도해 주세요.'}</div>}
               </form>
             </div>
 
             {showPaymentStep && (
               <div className="absolute inset-0 bg-white z-10 animate-fadeIn overflow-y-auto">
-                <div className="p-12">
+                <div className="p-8 md:p-12">
                   <button
                     onClick={() => setShowPaymentStep(false)}
                     className="mb-8 text-sm font-bold text-gray-400 hover:text-amber-600 transition-colors flex items-center gap-2"
@@ -934,7 +1002,7 @@ export default function CoffeeShopLanding() {
                   </button>
                   <div className="text-center mb-10">
                     <span className="text-amber-600 text-[10px] font-black uppercase tracking-[0.2em] block mb-2">Final Step</span>
-                    <h2 className="text-3xl font-black text-gray-900 italic">PAYMENT</h2>
+                    <h2 className="text-2xl md:text-3xl font-black text-gray-900 italic">PAYMENT</h2>
                     <p className="text-gray-400 text-xs font-bold mt-2">안전한 결제를 위해 토스페이먼츠 보안 시스템을 사용합니다.</p>
                   </div>
 
@@ -954,37 +1022,37 @@ export default function CoffeeShopLanding() {
 
       {/* Newsletter Modal */}
       {showNewsletterModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 glass animate-fadeIn" onClick={() => setShowNewsletterModal(false)}>
-          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-lg relative animate-modalFadeIn" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setShowNewsletterModal(false)} className="absolute top-8 right-8 text-3xl font-light text-gray-400 hover:text-black transition-colors">×</button>
-            <div className="p-12">
-              <div className="text-center mb-10">
-                <div className="w-20 h-20 bg-amber-50 rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6">📬</div>
-                <h2 className="text-3xl font-black mb-4 text-gray-900">무료 구독 신청</h2>
-                <p className="text-gray-500 font-bold leading-relaxed">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-6 glass animate-fadeIn" onClick={() => setShowNewsletterModal(false)}>
+          <div className="bg-white rounded-[2.5rem] md:rounded-[40px] shadow-2xl w-full max-w-lg relative animate-modalFadeIn" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setShowNewsletterModal(false)} className="absolute top-6 right-6 md:top-8 md:right-8 text-3xl font-light text-gray-400 hover:text-black transition-colors">×</button>
+            <div className="p-8 md:p-12">
+              <div className="text-center mb-8 md:mb-10">
+                <div className="w-16 md:w-20 h-16 md:h-20 bg-amber-50 rounded-2xl md:rounded-3xl flex items-center justify-center text-3xl md:text-4xl mx-auto mb-6">📬</div>
+                <h2 className="text-2xl md:text-3xl font-black mb-4 text-gray-900">무료 구독 신청</h2>
+                <p className="text-gray-500 font-bold leading-relaxed text-sm md:text-base">
                   매주 화요일, 매출 200% 올리는<br />
                   마케팅 비결을 이메일로 보내드려요.
                 </p>
               </div>
 
-              <form onSubmit={handleNewsletterSubmit} className="space-y-6">
+              <form onSubmit={handleNewsletterSubmit} className="space-y-4 md:space-y-6">
                 <input
                   type="email"
                   placeholder="이메일 주소를 입력하세요"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
-                  className="w-full px-8 py-5 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-lg text-gray-900"
+                  className="w-full px-6 py-4 rounded-xl md:rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-base md:text-lg text-gray-900"
                   required
                 />
                 <button
                   type="submit"
                   disabled={newsletterStatus === 'loading'}
-                  className="w-full py-5 rounded-2xl bg-amber-600 text-white font-black text-xl hover:bg-amber-700 transition-all shadow-xl active:scale-95 disabled:opacity-50"
+                  className="w-full py-4 md:py-5 rounded-xl md:rounded-2xl bg-amber-600 text-white font-black text-lg md:text-xl hover:bg-amber-700 transition-all shadow-xl active:scale-95 disabled:opacity-50"
                 >
-                  {newsletterStatus === 'loading' ? '무료 구독하기' : '무료 구독하기'}
+                  {newsletterStatus === 'loading' ? '처리 중...' : '무료 구독하기'}
                 </button>
-                {newsletterStatus === 'success' && <div className="p-6 rounded-2xl bg-green-50 text-green-700 text-center font-black animate-fadeIn">🎉 구독 신청이 완료되었습니다!</div>}
-                {newsletterStatus === 'error' && <div className="p-6 rounded-2xl bg-red-50 text-red-700 text-center font-black animate-fadeIn">❌ {submitMessage || '다시 시도해 주세요.'}</div>}
+                {newsletterStatus === 'success' && <div className="p-4 md:p-6 rounded-xl md:rounded-2xl bg-green-50 text-green-700 text-center font-black animate-fadeIn text-sm">🎉 구독 신청이 완료되었습니다!</div>}
+                {newsletterStatus === 'error' && <div className="p-4 md:p-6 rounded-xl md:rounded-2xl bg-red-50 text-red-700 text-center font-black animate-fadeIn text-sm">❌ {submitMessage || '다시 시도해 주세요.'}</div>}
               </form>
             </div>
           </div>
@@ -993,10 +1061,10 @@ export default function CoffeeShopLanding() {
 
       {/* Auth Selection Modal */}
       {showAuthModal && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center p-6 glass animate-fadeIn" onClick={() => setShowAuthModal(false)}>
-          <div className="bg-white rounded-[40px] shadow-2xl w-full max-w-md relative animate-modalFadeIn" onClick={e => e.stopPropagation()}>
-            <button onClick={() => setShowAuthModal(false)} className="absolute top-8 right-8 text-3xl font-light text-gray-400 hover:text-black transition-colors">×</button>
-            <div className="p-10">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 md:p-6 glass animate-fadeIn" onClick={() => setShowAuthModal(false)}>
+          <div className="bg-white rounded-[2.5rem] md:rounded-[40px] shadow-2xl w-full max-w-md relative animate-modalFadeIn" onClick={e => e.stopPropagation()}>
+            <button onClick={() => setShowAuthModal(false)} className="absolute top-6 right-6 md:top-8 md:right-8 text-3xl font-light text-gray-400 hover:text-black transition-colors">×</button>
+            <div className="p-8 md:p-10">
               {authMode !== 'selection' && (
                 <button
                   onClick={() => setAuthMode('selection')}
@@ -1011,7 +1079,7 @@ export default function CoffeeShopLanding() {
                   {authMode === 'login' ? '🔑' : authMode === 'signup' ? '📝' : '👤'}
                 </div>
                 <h2 className="text-2xl font-black text-gray-900 italic tracking-tighter">CAFÉ DREAM</h2>
-                <p className="text-gray-400 text-xs font-bold mt-1">
+                <p className="text-gray-400 text-[10px] md:text-xs font-bold mt-1">
                   {authMode === 'login' ? '다시 오신 것을 환영합니다!' : authMode === 'signup' ? '새로운 시작을 함께하세요' : '이미 250명의 사장님들과 함께하고 있습니다.'}
                 </p>
               </div>
@@ -1020,7 +1088,7 @@ export default function CoffeeShopLanding() {
                 <div className="space-y-4">
                   <button
                     onClick={() => setAuthMode('login')}
-                    className="w-full py-5 rounded-2xl bg-[#1A1A1A] text-white font-black text-xl hover:bg-amber-800 transition-all shadow-xl active:scale-95"
+                    className="w-full py-5 rounded-xl md:rounded-2xl bg-[#1A1A1A] text-white font-black text-xl hover:bg-amber-800 transition-all shadow-xl active:scale-95"
                   >
                     로그인
                   </button>
@@ -1031,7 +1099,7 @@ export default function CoffeeShopLanding() {
                   </div>
                   <button
                     onClick={() => setAuthMode('signup')}
-                    className="w-full py-5 rounded-2xl bg-white border-2 border-gray-100 text-gray-900 font-black text-xl hover:border-amber-500 hover:text-amber-800 transition-all shadow-sm active:scale-95"
+                    className="w-full py-5 rounded-xl md:rounded-2xl bg-white border-2 border-gray-100 text-gray-900 font-black text-xl hover:border-amber-500 hover:text-amber-800 transition-all shadow-sm active:scale-95"
                   >
                     회원가입
                   </button>
@@ -1043,7 +1111,7 @@ export default function CoffeeShopLanding() {
                     placeholder="이메일 주소"
                     value={authData.email}
                     onChange={(e) => setAuthData({ ...authData, email: e.target.value })}
-                    className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-gray-900 font-medium"
+                    className="w-full px-6 py-4 rounded-xl md:rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-gray-900 font-medium"
                     required
                   />
                   {authMode === 'signup' && (
@@ -1052,7 +1120,7 @@ export default function CoffeeShopLanding() {
                       placeholder="이름"
                       value={authData.name}
                       onChange={(e) => setAuthData({ ...authData, name: e.target.value })}
-                      className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-gray-900 font-medium"
+                      className="w-full px-6 py-4 rounded-xl md:rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-gray-900 font-medium"
                       required
                     />
                   )}
@@ -1061,7 +1129,7 @@ export default function CoffeeShopLanding() {
                     placeholder="비밀번호"
                     value={authData.password}
                     onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
-                    className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-gray-900 font-medium"
+                    className="w-full px-6 py-4 rounded-xl md:rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-gray-900 font-medium"
                     required
                   />
                   {authMode === 'signup' && (
@@ -1070,7 +1138,7 @@ export default function CoffeeShopLanding() {
                       placeholder="비밀번호 확인"
                       value={authData.confirmPassword}
                       onChange={(e) => setAuthData({ ...authData, confirmPassword: e.target.value })}
-                      className="w-full px-6 py-4 rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-gray-900 font-medium"
+                      className="w-full px-6 py-4 rounded-xl md:rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-gray-900 font-medium"
                       required
                     />
                   )}
@@ -1084,7 +1152,7 @@ export default function CoffeeShopLanding() {
                   <button
                     type="submit"
                     disabled={authStatus === 'loading'}
-                    className="w-full py-5 rounded-2xl bg-amber-600 text-white font-black text-xl hover:bg-amber-700 transition-all shadow-xl active:scale-95 mt-4 disabled:opacity-50"
+                    className="w-full py-5 rounded-xl md:rounded-2xl bg-amber-600 text-white font-black text-xl hover:bg-amber-700 transition-all shadow-xl active:scale-95 mt-4 disabled:opacity-50"
                   >
                     {authStatus === 'loading' ? '처리 중...' : authMode === 'login' ? '로그인하기' : '가입하기'}
                   </button>

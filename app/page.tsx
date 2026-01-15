@@ -44,6 +44,7 @@ export default function CoffeeShopLanding() {
   const [showPaymentStep, setShowPaymentStep] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState(0);
   const [orderId, setOrderId] = useState('');
+  const [isInitialAuthCheckDone, setIsInitialAuthCheckDone] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -51,9 +52,15 @@ export default function CoffeeShopLanding() {
 
     // [Session] Check initial session and listen for changes
     const initSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        fetchUserInfo(session.user.email || '', session.user.id, session.user.user_metadata?.name);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          await fetchUserInfo(session.user.email || '', session.user.id, session.user.user_metadata?.name);
+        }
+      } catch (err) {
+        console.error('[Auth] Initial session check failed:', err);
+      } finally {
+        setIsInitialAuthCheckDone(true);
       }
     };
 
@@ -62,10 +69,11 @@ export default function CoffeeShopLanding() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(`[Auth Event] ${event}`);
       if (session?.user) {
-        fetchUserInfo(session.user.email || '', session.user.id, session.user.user_metadata?.name);
+        await fetchUserInfo(session.user.email || '', session.user.id, session.user.user_metadata?.name);
       } else {
         setLoggedInUser(null);
       }
+      setIsInitialAuthCheckDone(true);
     });
 
     return () => {
@@ -120,9 +128,9 @@ export default function CoffeeShopLanding() {
 
   const getPlanPrice = (planName: string) => {
     switch (planName) {
-      case '베이직': return 290000;
-      case '프로': return 590000;
-      case '프리미엄': return 990000;
+      case '베이직': return 39000;
+      case '프로': return 89000;
+      case '프리미엄': return 159000;
       default: return 0;
     }
   };
@@ -205,42 +213,71 @@ export default function CoffeeShopLanding() {
     setAuthMessage('');
 
     try {
-      console.log(`[Client] Calling /api/auth/${authMode}`);
-      const response = await fetch(`/api/auth/${authMode}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      if (authMode === 'login') {
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: authData.email,
           password: authData.password,
-          ...(authMode === 'signup' && { name: authData.name })
-        }),
-      });
+        });
 
-      let data;
-      const contentType = response.headers.get("content-type");
-      if (contentType && contentType.indexOf("application/json") !== -1) {
-        data = await response.json();
-      } else {
-        const text = await response.text();
-        throw new Error(`서버 응답 오류 (Status: ${response.status}). 내용: ${text.substring(0, 50)}...`);
-      }
+        if (error) throw error;
 
-      if (response.ok && data.success) {
         setAuthStatus('success');
-        setAuthMessage(data.message);
-        if (authMode === 'login') {
-          setLoggedInUser(data.user);
+        setAuthMessage('로그인에 성공했습니다.');
+
+        // fetchUserInfo will be triggered by onAuthStateChange listener in useEffect,
+        // but let's call it manually for faster UI update
+        await fetchUserInfo(data.user.email!, data.user.id, data.user.user_metadata?.name);
+
+        setTimeout(() => {
+          setShowAuthModal(false);
+          setAuthStatus('idle');
+          setAuthData({ email: '', password: '', confirmPassword: '', name: '' });
+        }, 1500);
+      } else {
+        // signup
+        const { data, error } = await supabase.auth.signUp({
+          email: authData.email,
+          password: authData.password,
+          options: {
+            data: {
+              name: authData.name,
+            },
+          },
+        });
+
+        if (error) throw error;
+
+        // If signup is successful, also sync name to our 'users' table via our API
+        // This ensures the custom logic in our API (like DB upsert) still runs
+        try {
+          await fetch('/api/auth/signup', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: authData.email,
+              password: authData.password,
+              name: authData.name,
+            }),
+          });
+        } catch (syncErr) {
+          console.warn('[Client] Failed to sync signup to DB, but auth succeeded');
+        }
+
+        setAuthStatus('success');
+        setAuthMessage(data.session ? '회원가입 및 로그인에 성공했습니다.' : '회원가입 요청이 완료되었습니다. 이메일을 확인해 주세요.');
+
+        if (data.session) {
+          await fetchUserInfo(data.user!.email!, data.user!.id, authData.name);
           setTimeout(() => {
             setShowAuthModal(false);
             setAuthStatus('idle');
+            setAuthData({ email: '', password: '', confirmPassword: '', name: '' });
           }, 1500);
         }
-      } else {
-        throw new Error(data.message || '인증 오류가 발생했습니다.');
       }
     } catch (error: any) {
       setAuthStatus('error');
-      setAuthMessage(error.message || '네트워크 오류가 발생했습니다.');
+      setAuthMessage(error.message || '인증 오류가 발생했습니다.');
       console.error('Auth Error:', error);
     }
   };
@@ -250,9 +287,15 @@ export default function CoffeeShopLanding() {
   }, []);
 
   const handleLogout = async () => {
-    setLoggedInUser(null);
-    // Add supabase.auth.signOut() logic if needed
-    alert('로그아웃 되었습니다.');
+    try {
+      await supabase.auth.signOut();
+      setLoggedInUser(null);
+      alert('로그아웃 되었습니다.');
+    } catch (err) {
+      console.error('[Auth] Logout failed:', err);
+      // Fallback
+      setLoggedInUser(null);
+    }
   };
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
@@ -352,7 +395,13 @@ export default function CoffeeShopLanding() {
                 대시보드
                 <span className="absolute -bottom-1 left-0 w-1/2 h-0.5 bg-amber-600 transition-all group-hover:w-full" />
               </Link>
-              {loggedInUser ? (
+
+              {!isInitialAuthCheckDone ? (
+                <div className="flex items-center gap-4">
+                  <div className="w-24 h-4 bg-gray-100 animate-pulse rounded-full" />
+                  <div className="w-20 h-10 bg-gray-100 animate-pulse rounded-full" />
+                </div>
+              ) : loggedInUser ? (
                 <div className="flex items-center gap-4">
                   <span className="text-sm font-black text-amber-900">{loggedInUser.name || '김나리'} 사장님</span>
                   <button
@@ -616,6 +665,11 @@ export default function CoffeeShopLanding() {
                 <div className="grid grid-cols-2 gap-6 h-72">
                   <div className="flex flex-col gap-4 group">
                     <div className="flex-1 rounded-3xl overflow-hidden border-2 border-white/5 relative group-hover:border-red-500/30 transition-all duration-500 shadow-2xl bg-gray-800">
+                      <img
+                        src="/before_cafe.png"
+                        alt="Before marketing"
+                        className="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500"
+                      />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end justify-center pb-6">
                         <span className="px-4 py-2 rounded-full bg-white/5 backdrop-blur-sm text-white text-[10px] font-black uppercase tracking-widest border border-white/10">Before</span>
                       </div>
@@ -625,7 +679,12 @@ export default function CoffeeShopLanding() {
 
                   <div className="flex flex-col gap-4 group">
                     <div className="flex-1 rounded-3xl overflow-hidden border-2 border-amber-500/30 relative shadow-2xl shadow-amber-900/20 group-hover:scale-[1.02] transition-all duration-500 bg-amber-900/20">
-                      <div className="absolute top-4 right-4">
+                      <img
+                        src="/after_cafe.png"
+                        alt="After marketing"
+                        className="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500"
+                      />
+                      <div className="absolute top-4 right-4 z-20">
                         <span className="px-4 py-2 rounded-full bg-amber-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl animate-bounce">Success</span>
                       </div>
                       <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end justify-center pb-6">
@@ -687,9 +746,9 @@ export default function CoffeeShopLanding() {
 
           <div className="grid md:grid-cols-3 gap-8">
             {[
-              { name: '베이직', price: '290,000' },
-              { name: '프로', price: '590,000', popular: true },
-              { name: '프리미엄', price: '990,000' }
+              { name: '베이직', price: '39,000' },
+              { name: '프로', price: '89,000', popular: true },
+              { name: '프리미엄', price: '159,000' }
             ].map((plan, i) => (
               <div key={i} className={`p-10 rounded-[3rem] transition-all duration-500 ${plan.popular ? 'bg-amber-600 text-white shadow-2xl scale-105 z-10' : 'bg-white shadow-xl'}`}>
                 <h3 className="text-2xl font-black mb-2">{plan.name}</h3>

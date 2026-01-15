@@ -207,7 +207,7 @@ export async function POST(request: Request) {
 
                 const resendResult = await resend.emails.send({
                     from: 'CafeDream <onboarding@resend.dev>',
-                    to: [process.env.NOTIFICATION_EMAIL || 'yjm3625@gmail.com'],
+                    to: [process.env.NOTIFICATION_EMAIL || 'ap9450150918@gmail.com'],
                     subject: `[카페드림] ${typeName}: ${name || email.split('@')[0]}님`,
                     html: `
                         <div style="font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 25px; border-radius: 12px; border-top: 5px solid ${accentColor};">

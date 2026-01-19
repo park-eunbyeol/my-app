@@ -903,19 +903,45 @@ export default function CoffeeShopLanding() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { name: '베이직', price: '39,000' },
-              { name: '프로', price: '89,000', popular: true },
-              { name: '프리미엄', price: '159,000' }
+              {
+                name: '베이직',
+                price: '39,000',
+                desc: '상권 분석 및 기본 플레이스 관리',
+                recommend: '마케팅 입문 사장님 추천'
+              },
+              {
+                name: '프로',
+                price: '89,000',
+                popular: true,
+                desc: '당근 광고 & 인스타 포스팅 대행',
+                recommend: '신규 고객 유입이 필요한 카페'
+              },
+              {
+                name: '프리미엄',
+                price: '159,000',
+                desc: 'CRM 단골 관리 & 풀케어 솔루션',
+                recommend: '안정적 매출이 필요한 대형 카페'
+              }
             ].map((plan, i) => (
-              <div key={i} className={`p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] transition-all duration-500 ${plan.popular ? 'bg-amber-600 text-white shadow-2xl md:scale-105 z-10' : 'bg-white shadow-xl'}`}>
+              <div key={i} className={`p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] transition-all duration-500 flex flex-col ${plan.popular ? 'bg-amber-600 text-white shadow-2xl md:scale-105 z-10' : 'bg-white shadow-xl'}`}>
+                <div className="mb-4">
+                  <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${plan.popular ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-700'}`}>
+                    {plan.recommend}
+                  </span>
+                </div>
                 <h3 className="text-2xl font-black mb-2">{plan.name}</h3>
-                <div className="text-4xl font-black mb-8">₩{plan.price}<span className="text-sm opacity-50">/월</span></div>
-                <button
-                  onClick={() => openSubscriptionModal(plan.name, 'pricing_plan')}
-                  className={`w-full py-4 rounded-2xl font-black transition-all ${plan.popular ? 'bg-white text-amber-900' : 'bg-gray-100 text-gray-900 hover:bg-amber-600 hover:text-white'}`}
-                >
-                  신청하기
-                </button>
+                <div className="text-4xl font-black mb-4">₩{plan.price}<span className="text-sm opacity-50">/월</span></div>
+                <p className={`text-sm font-medium mb-8 leading-relaxed ${plan.popular ? 'text-white/80' : 'text-gray-500'}`}>
+                  {plan.desc}
+                </p>
+                <div className="mt-auto">
+                  <button
+                    onClick={() => openSubscriptionModal(plan.name, 'pricing_plan')}
+                    className={`w-full py-4 rounded-2xl font-black transition-all ${plan.popular ? 'bg-white text-amber-900' : 'bg-gray-100 text-gray-900 hover:bg-amber-600 hover:text-white'}`}
+                  >
+                    신청하기
+                  </button>
+                </div>
               </div>
             ))}
           </div>

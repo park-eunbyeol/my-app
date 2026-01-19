@@ -12,6 +12,7 @@ export default function CoffeeShopLanding() {
     name: '',
     phone: '',
     cafeName: '',
+    region: '',
     plan: '',
     interestedServices: [] as string[],
     agreePrivacy: false,
@@ -30,6 +31,8 @@ export default function CoffeeShopLanding() {
   const [authData, setAuthData] = useState({ email: '', password: '', confirmPassword: '', name: '' });
   const [authStatus, setAuthStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [authMessage, setAuthMessage] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   interface User {
     id: string;
     email: string;
@@ -54,12 +57,27 @@ export default function CoffeeShopLanding() {
     // [Session] Check initial session and listen for changes
     const initSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('[Auth] Session check error:', error);
+          setLoggedInUser(null);
+          // Clear any corrupted session data
+          if (typeof window !== 'undefined') {
+            Object.keys(localStorage).forEach(key => {
+              if (key.startsWith('sb-')) {
+                localStorage.removeItem(key);
+              }
+            });
+          }
+        } else if (session?.user) {
           await fetchUserInfo(session.user.email || '', session.user.id, session.user.user_metadata?.name);
+        } else {
+          // No session - ensure user is logged out
+          setLoggedInUser(null);
         }
       } catch (err) {
         console.error('[Auth] Initial session check failed:', err);
+        setLoggedInUser(null);
       } finally {
         setIsInitialAuthCheckDone(true);
       }
@@ -72,10 +90,19 @@ export default function CoffeeShopLanding() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log(`[Auth Event] ${event}`);
-      if (session?.user) {
-        await fetchUserInfo(session.user.email || '', session.user.id, session.user.user_metadata?.name);
-      } else {
+      if (event === 'SIGNED_OUT' || !session) {
+        // Ensure logout state is properly set
         setLoggedInUser(null);
+        // Clear localStorage on sign out
+        if (typeof window !== 'undefined') {
+          Object.keys(localStorage).forEach(key => {
+            if (key.startsWith('sb-')) {
+              localStorage.removeItem(key);
+            }
+          });
+        }
+      } else if (session?.user && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED')) {
+        await fetchUserInfo(session.user.email || '', session.user.id, session.user.user_metadata?.name);
       }
       setIsInitialAuthCheckDone(true);
     });
@@ -179,7 +206,7 @@ export default function CoffeeShopLanding() {
 
         setSubmitStatus('success');
         setFormData({
-          email: '', name: '', phone: '', cafeName: '', plan: '',
+          email: '', name: '', phone: '', cafeName: '', region: '', plan: '',
           interestedServices: [],
           agreePrivacy: false, agreeMarketing: false,
           source: '' // Reset source field
@@ -269,16 +296,22 @@ export default function CoffeeShopLanding() {
         }
 
         setAuthStatus('success');
-        setAuthMessage(data.session ? '회원가입 및 로그인에 성공했습니다.' : '회원가입 요청이 완료되었습니다. 이메일을 확인해 주세요.');
+        setAuthMessage('회원가입이 완료되었습니다. 로그인해 주세요.');
 
+        // 회원가입 후 세션이 생성되어도 자동 로그인하지 않음
+        // 대신 로그인 모달로 전환
         if (data.session) {
-          await fetchUserInfo(data.user!.email!, data.user!.id, authData.name);
-          setTimeout(() => {
-            setShowAuthModal(false);
-            setAuthStatus('idle');
-            setAuthData({ email: '', password: '', confirmPassword: '', name: '' });
-          }, 1500);
+          // 세션이 생성된 경우 로그아웃 처리
+          await supabase.auth.signOut();
         }
+
+        // 성공 메시지 표시 후 로그인 모달로 전환
+        setTimeout(() => {
+          setAuthMode('login');
+          setAuthStatus('idle');
+          // 이메일은 유지하여 사용자가 바로 로그인할 수 있도록 함
+          setAuthData({ email: authData.email, password: '', confirmPassword: '', name: '' });
+        }, 1500);
       }
     } catch (error: any) {
       setAuthStatus('error');
@@ -293,13 +326,48 @@ export default function CoffeeShopLanding() {
 
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('[Auth] SignOut error:', error);
+      }
+      
+      // Clear user state immediately
       setLoggedInUser(null);
+      
+      // Clear all Supabase-related localStorage items
+      if (typeof window !== 'undefined') {
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('sb-')) {
+            localStorage.removeItem(key);
+          }
+        });
+      }
+      
+      // Verify session is cleared
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        console.warn('[Auth] Session still exists after signOut, clearing manually');
+        // Force clear by removing all auth tokens
+        if (typeof window !== 'undefined') {
+          localStorage.clear();
+          sessionStorage.clear();
+        }
+      }
+      
       alert('로그아웃 되었습니다.');
     } catch (err) {
       console.error('[Auth] Logout failed:', err);
-      // Fallback
+      // Fallback: force clear everything
       setLoggedInUser(null);
+      if (typeof window !== 'undefined') {
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('sb-')) {
+            localStorage.removeItem(key);
+          }
+        });
+      }
     }
   };
 
@@ -962,15 +1030,23 @@ export default function CoffeeShopLanding() {
           <div className="bg-white rounded-[2.5rem] md:rounded-[40px] shadow-2xl w-full max-w-2xl max-h-[95vh] md:max-h-[90vh] overflow-y-auto relative animate-modalFadeIn" onClick={e => e.stopPropagation()}>
             <button onClick={() => setShowSubscriptionModal(false)} className="absolute top-6 right-6 md:top-8 md:right-8 text-3xl font-light text-gray-400 hover:text-black transition-colors z-20">×</button>
             <div className="p-8 md:p-12">
-              <h2 className="text-2xl md:text-3xl font-black text-center mb-8 md:mb-10">{selectedPlan ? `[${selectedPlan}] 플랜 신청` : '무료 진단 신청'}</h2>
+              <h2 className="text-2xl md:text-3xl font-black text-center mb-8 md:mb-10">
+                {selectedPlan ? `[${selectedPlan}] 플랜 신청` : formData.source === 'final_cta' ? '파트너십 신청' : '무료 진단 신청'}
+              </h2>
               <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {['cafeName', 'name', 'email', 'phone'].map(field => (
+                  {((selectedPlan || formData.source === 'final_cta') ? ['cafeName', 'name', 'email', 'phone'] : ['cafeName', 'name', 'email', 'phone', 'region']).map(field => (
                     <div key={field}>
                       <input
                         type={field === 'email' ? 'email' : 'text'}
                         name={field}
-                        placeholder={field === 'cafeName' ? '카페명' : field === 'name' ? '성함' : field === 'email' ? '이메일' : '연락처'}
+                        placeholder={
+                          field === 'cafeName' ? '카페명' : 
+                          field === 'name' ? '성함' : 
+                          field === 'email' ? '이메일' : 
+                          field === 'phone' ? '연락처' : 
+                          '지역'
+                        }
                         value={(formData as any)[field]}
                         onChange={handleInputChange}
                         className={`w-full px-6 py-4 rounded-xl md:rounded-2xl bg-gray-50 border-2 transition-all focus:outline-none ${errors[field] ? 'border-red-200' : 'border-transparent focus:border-amber-200'}`}
@@ -1130,23 +1206,61 @@ export default function CoffeeShopLanding() {
                       required
                     />
                   )}
-                  <input
-                    type="password"
-                    placeholder="비밀번호"
-                    value={authData.password}
-                    onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
-                    className="w-full px-6 py-4 rounded-xl md:rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-gray-900 font-medium"
-                    required
-                  />
-                  {authMode === 'signup' && (
+                  <div className="relative">
                     <input
-                      type="password"
-                      placeholder="비밀번호 확인"
-                      value={authData.confirmPassword}
-                      onChange={(e) => setAuthData({ ...authData, confirmPassword: e.target.value })}
-                      className="w-full px-6 py-4 rounded-xl md:rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-gray-900 font-medium"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="비밀번호"
+                      value={authData.password}
+                      onChange={(e) => setAuthData({ ...authData, password: e.target.value })}
+                      className="w-full px-6 py-4 pr-12 rounded-xl md:rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-gray-900 font-medium"
                       required
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                      aria-label={showPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+                    >
+                      {showPassword ? (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
+                  {authMode === 'signup' && (
+                    <div className="relative">
+                      <input
+                        type={showConfirmPassword ? "text" : "password"}
+                        placeholder="비밀번호 확인"
+                        value={authData.confirmPassword}
+                        onChange={(e) => setAuthData({ ...authData, confirmPassword: e.target.value })}
+                        className="w-full px-6 py-4 pr-12 rounded-xl md:rounded-2xl bg-gray-50 border-2 border-transparent focus:border-amber-200 focus:bg-white transition-all focus:outline-none text-gray-900 font-medium"
+                        required
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors focus:outline-none"
+                        aria-label={showConfirmPassword ? "비밀번호 숨기기" : "비밀번호 보기"}
+                      >
+                        {showConfirmPassword ? (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                          </svg>
+                        ) : (
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                        )}
+                      </button>
+                    </div>
                   )}
 
                   {authMessage && (

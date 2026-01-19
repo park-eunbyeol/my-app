@@ -132,6 +132,7 @@ export async function POST(request: Request) {
             name,
             phone,
             cafeName,
+            region,
             plan,
             interestedServices,
             agreePrivacy,
@@ -225,6 +226,12 @@ export async function POST(request: Request) {
                                         <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #f7f7f7;">카페/업체명</td>
                                         <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0;">${cafeName || '-'}</td>
                                     </tr>
+                                    ${region ? `
+                                    <tr>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #f7f7f7;">지역</td>
+                                        <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0;">${region}</td>
+                                    </tr>
+                                    ` : ''}
                                     ` : ''}
                                     <tr>
                                         <td style="padding: 12px 15px; border-bottom: 1px solid #f0f0f0; font-weight: bold; background-color: #f7f7f7;">이메일</td>

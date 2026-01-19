@@ -38,20 +38,65 @@ export default function DashboardPage() {
     }, []);
 
     // Interactivity Handlers
-    const generateAIContent = () => {
+    const generateAIContent = async () => {
         setIsGenerating(true);
         setAiContent('');
 
-        const messages = [
-            "최근 인근 대학가 개강 시즌에 맞춰 '테이크아웃 20% 할인' 소식을 발행해보세요. 2시~4시 매출이 25% 상승할 것으로 보입니다.",
-            "이번 주말 비 소식이 있습니다. '비 오는 날 한정: 수제 쿠키 증정' 이벤트를 당근마켓에 올리면 평소보다 2배 더 많은 고객이 유입될 거예요.",
-            "오전 11시 타겟 마케팅: '브런치 세트 런칭' 알림을 보내보세요. 인근 직장인들의 점심 수요를 흡수할 수 있습니다."
-        ];
+        try {
+            const response = await fetch('/api/ai/strategy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    region: '서울', // 실제로는 사용자 데이터에서 가져올 수 있음
+                    cafeName: loggedInUser?.name || '카페',
+                    marketStats: {
+                        cafeCount: marketStats.cafeCount,
+                        avgRating: marketStats.avgRating,
+                        placeClicks: marketStats.placeClicks
+                    }
+                }),
+            });
 
-        setTimeout(() => {
-            setAiContent(messages[Math.floor(Math.random() * messages.length)]);
+            const data = await response.json();
+            
+            console.log('[Dashboard] AI API response:', data);
+
+            if (data.success && data.strategy) {
+                // AI가 생성한 전략인지 확인 (폴백 메시지가 아닌지)
+                const isAIGenerated = !data.strategy.includes('AI 서비스 설정 중') && 
+                                     !data.strategy.includes('테이크아웃 20% 할인') &&
+                                     !data.strategy.includes('비 오는 날 한정');
+                
+                if (isAIGenerated) {
+                    console.log('[Dashboard] ✅ AI-generated strategy received');
+                } else {
+                    console.log('[Dashboard] ⚠️ Fallback message received');
+                }
+                
+                setAiContent(data.strategy);
+            } else {
+                // 폴백 메시지
+                const fallbackMessages = [
+                    "최근 인근 대학가 개강 시즌에 맞춰 '테이크아웃 20% 할인' 소식을 발행해보세요. 2시~4시 매출이 25% 상승할 것으로 보입니다.",
+                    "이번 주말 비 소식이 있습니다. '비 오는 날 한정: 수제 쿠키 증정' 이벤트를 당근마켓에 올리면 평소보다 2배 더 많은 고객이 유입될 거예요.",
+                    "오전 11시 타겟 마케팅: '브런치 세트 런칭' 알림을 보내보세요. 인근 직장인들의 점심 수요를 흡수할 수 있습니다."
+                ];
+                setAiContent(fallbackMessages[Math.floor(Math.random() * fallbackMessages.length)]);
+            }
+        } catch (error) {
+            console.error('[Dashboard] AI strategy generation failed:', error);
+            // 에러 발생 시 폴백 메시지
+            const fallbackMessages = [
+                "최근 인근 대학가 개강 시즌에 맞춰 '테이크아웃 20% 할인' 소식을 발행해보세요. 2시~4시 매출이 25% 상승할 것으로 보입니다.",
+                "이번 주말 비 소식이 있습니다. '비 오는 날 한정: 수제 쿠키 증정' 이벤트를 당근마켓에 올리면 평소보다 2배 더 많은 고객이 유입될 거예요.",
+                "오전 11시 타겟 마케팅: '브런치 세트 런칭' 알림을 보내보세요. 인근 직장인들의 점심 수요를 흡수할 수 있습니다."
+            ];
+            setAiContent(fallbackMessages[Math.floor(Math.random() * fallbackMessages.length)]);
+        } finally {
             setIsGenerating(false);
-        }, 1500);
+        }
     };
 
     const sendCoupons = () => {
@@ -330,15 +375,15 @@ export default function DashboardPage() {
                         {activeTab === 'crm' && (
                             <div className="space-y-10">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                    <div className="p-12 rounded-[4rem] bg-white/5 border border-white/5 flex flex-col justify-between h-[450px]">
-                                        <div>
+                                    <div className="p-12 rounded-[4rem] bg-white/5 border border-white/5 flex flex-col min-h-[450px]">
+                                        <div className="flex-1">
                                             <div className="w-16 h-16 rounded-2xl bg-amber-600/20 flex items-center justify-center text-3xl mb-8">🤳</div>
                                             <h3 className="text-2xl font-black mb-4">재방문 유도 자동 쿠폰</h3>
-                                            <p className="text-gray-400 font-medium leading-relaxed mb-10 max-w-sm">
+                                            <p className="text-gray-400 font-medium leading-relaxed mb-0 max-w-sm">
                                                 방문이 뜸해진 단골 고객들을 시스템이 자동으로 분류하여, '사장님이 직접 쓴 것 같은' 따뜻한 안부 메시지와 쿠폰을 보냅니다.
                                             </p>
                                         </div>
-                                        <div className="flex flex-col gap-4">
+                                        <div className="flex flex-col gap-5 pt-8">
                                             <div className="p-5 rounded-2xl bg-amber-900/20 border border-amber-900/30 flex items-center justify-between">
                                                 <div>
                                                     <p className="text-xs font-black text-amber-100 opacity-50 uppercase mb-1">Target Segments</p>

@@ -12,6 +12,7 @@
     "@supabase/supabase-js": "^2.90.0",
     "@tosspayments/tosspayments-sdk": "^2.5.0",
     "next": "16.1.1",
+    "openai": "^6.16.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "resend": "^6.7.0"

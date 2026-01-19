@@ -2,11 +2,26 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import KakaoMap from '@/components/KakaoMap';
+import dynamic from 'next/dynamic'; // 추가!
+// import KakaoMap from '@/components/KakaoMap'; // 이 줄 삭제!
 import TossPaymentWidget from '@/components/TossPaymentWidget';
 import { supabase } from '@/lib/supabase';
 
+// 카카오 맵을 dynamic import로 변경
+const KakaoMap = dynamic(
+  () => import('@/components/KakaoMap'),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="w-full h-[500px] bg-[#1A110D] rounded-[3rem] flex items-center justify-center">
+        <div className="text-white text-sm font-bold">지도 로딩중...</div>
+      </div>
+    )
+  }
+);
+
 export default function CoffeeShopLanding() {
+  // 나머지 코드는 그대로...() {
   const [formData, setFormData] = useState({
     email: '',
     name: '',
@@ -328,14 +343,14 @@ export default function CoffeeShopLanding() {
     try {
       // Sign out from Supabase
       const { error } = await supabase.auth.signOut();
-      
+
       if (error) {
         console.error('[Auth] SignOut error:', error);
       }
-      
+
       // Clear user state immediately
       setLoggedInUser(null);
-      
+
       // Clear all Supabase-related localStorage items
       if (typeof window !== 'undefined') {
         Object.keys(localStorage).forEach(key => {
@@ -344,7 +359,7 @@ export default function CoffeeShopLanding() {
           }
         });
       }
-      
+
       // Verify session is cleared
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
@@ -355,7 +370,7 @@ export default function CoffeeShopLanding() {
           sessionStorage.clear();
         }
       }
-      
+
       alert('로그아웃 되었습니다.');
     } catch (err) {
       console.error('[Auth] Logout failed:', err);
@@ -1041,11 +1056,11 @@ export default function CoffeeShopLanding() {
                         type={field === 'email' ? 'email' : 'text'}
                         name={field}
                         placeholder={
-                          field === 'cafeName' ? '카페명' : 
-                          field === 'name' ? '성함' : 
-                          field === 'email' ? '이메일' : 
-                          field === 'phone' ? '연락처' : 
-                          '지역'
+                          field === 'cafeName' ? '카페명' :
+                            field === 'name' ? '성함' :
+                              field === 'email' ? '이메일' :
+                                field === 'phone' ? '연락처' :
+                                  '지역'
                         }
                         value={(formData as any)[field]}
                         onChange={handleInputChange}

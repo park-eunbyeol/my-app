@@ -21,7 +21,7 @@ const KakaoMap = dynamic(
 );
 
 export default function CoffeeShopLanding() {
-  // 나머지 코드는 그대로...() {
+
   const [formData, setFormData] = useState({
     email: '',
     name: '',

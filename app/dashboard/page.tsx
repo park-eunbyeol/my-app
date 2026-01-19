@@ -7,6 +7,8 @@ import KakaoMap from '@/components/KakaoMap';
 export default function DashboardPage() {
     const [activeTab, setActiveTab] = useState('ranking');
     const [loggedInUser, setLoggedInUser] = useState<any>(null);
+    const [mounted, setMounted] = useState(false);
+    const [lastUpdateTime, setLastUpdateTime] = useState<string>('');
 
     // Dashboard Simulation States
     const [aiContent, setAiContent] = useState('');
@@ -30,6 +32,9 @@ export default function DashboardPage() {
 
     // Effects
     useEffect(() => {
+        setMounted(true);
+        setLastUpdateTime(new Date().toLocaleTimeString());
+
         // Check for logged in user if needed
         const userJson = localStorage.getItem('user');
         if (userJson) {
@@ -60,21 +65,21 @@ export default function DashboardPage() {
             });
 
             const data = await response.json();
-            
+
             console.log('[Dashboard] AI API response:', data);
 
             if (data.success && data.strategy) {
                 // AI가 생성한 전략인지 확인 (폴백 메시지가 아닌지)
-                const isAIGenerated = !data.strategy.includes('AI 서비스 설정 중') && 
-                                     !data.strategy.includes('테이크아웃 20% 할인') &&
-                                     !data.strategy.includes('비 오는 날 한정');
-                
+                const isAIGenerated = !data.strategy.includes('AI 서비스 설정 중') &&
+                    !data.strategy.includes('테이크아웃 20% 할인') &&
+                    !data.strategy.includes('비 오는 날 한정');
+
                 if (isAIGenerated) {
                     console.log('[Dashboard] ✅ AI-generated strategy received');
                 } else {
                     console.log('[Dashboard] ⚠️ Fallback message received');
                 }
-                
+
                 setAiContent(data.strategy);
             } else {
                 // 폴백 메시지
@@ -223,10 +228,12 @@ export default function DashboardPage() {
                         </div>
 
                         <div className="flex items-center gap-3">
-                            <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 text-xs font-bold text-gray-400 shadow-xl">
-                                <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-                                LAST UPDATE: {new Date().toLocaleTimeString()}
-                            </div>
+                            {mounted && (
+                                <div className="px-4 py-2 rounded-xl bg-white/5 border border-white/10 flex items-center gap-3 text-xs font-bold text-gray-400 shadow-xl">
+                                    <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                                    LAST UPDATE: {lastUpdateTime}
+                                </div>
+                            )}
                         </div>
                     </div>
 

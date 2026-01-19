@@ -25,6 +25,7 @@ export default function KakaoMap({ address = "서울 강남구 강남대로 428"
     const markersRef = useRef<any[]>([]);
     const shopMarkerRef = useRef<any>(null);
 
+    // Hydration 에러 방지: 클라이언트 마운트 확인
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -93,7 +94,7 @@ export default function KakaoMap({ address = "서울 강남구 강남대로 428"
     }, [onSearch]);
 
     const initMap = useCallback(() => {
-        if (!window.kakao || !mapRef.current) return;
+        if (!window.kakao || !window.kakao.maps || !mapRef.current) return;
 
         window.kakao.maps.load(() => {
             const options = {
@@ -153,13 +154,14 @@ export default function KakaoMap({ address = "서울 강남구 강남대로 428"
         });
     };
 
-    const hasApiKey = !!process.env.NEXT_PUBLIC_KAKAO_MAP_KEY;
+    // 환경 변수 체크 (클라이언트에서만)
+    const hasApiKey = mounted ? !!process.env.NEXT_PUBLIC_KAKAO_MAP_KEY : true;
 
     useEffect(() => {
-        if (!mounted) return; // Hydration guard
+        if (!mounted) return; // Hydration guard - 서버 렌더링 시 실행 안 함
 
         const checkKakao = () => {
-            if (window.kakao && window.kakao.maps) {
+            if (typeof window !== 'undefined' && window.kakao && window.kakao.maps) {
                 console.log('[KakaoMap] window.kakao ready. Initializing...');
                 if (!initializedRef.current) {
                     initializedRef.current = true;
@@ -171,7 +173,7 @@ export default function KakaoMap({ address = "서울 강남구 강남대로 428"
         };
 
         if (!checkKakao()) {
-            console.warn('[KakaoMap] kakao not ready, starting intervals...');
+            console.warn('[KakaoMap] kakao not ready, starting intervals. Check if NEXT_PUBLIC_KAKAO_MAP_KEY is set and domain is registered in Kakao Console.');
             const interval = setInterval(() => {
                 if (checkKakao()) clearInterval(interval);
             }, 500);
@@ -179,20 +181,21 @@ export default function KakaoMap({ address = "서울 강남구 강남대로 428"
             const timeout = setTimeout(() => {
                 clearInterval(interval);
                 if (!initializedRef.current) {
-                    console.error('[KakaoMap] initialization failed after 5s timeout');
+                    console.error('[KakaoMap] initialization failed after 10s timeout. Potential issues: Missing API Key, Invalid Domain, or Network Error.');
                 }
-            }, 5000);
+            }, 10000);
 
             return () => {
                 clearInterval(interval);
                 clearTimeout(timeout);
             };
         }
-    }, [initMap, mounted]); // Added mounted to dependency array
+    }, [initMap, mounted]);
 
-
-
-    if (!mounted) return <div className={`bg-[#1A110D] rounded-[3rem] ${className}`} />;
+    // 서버 렌더링 시 플레이스홀더 반환 (Hydration 에러 방지)
+    if (!mounted) {
+        return <div className={`bg-[#1A110D] rounded-[3rem] ${className}`} style={{ minHeight: '400px' }} />;
+    }
 
     return (
         <div className={`relative rounded-[3rem] overflow-hidden group shadow-2xl ${className}`}>
@@ -211,7 +214,8 @@ export default function KakaoMap({ address = "서울 강남구 강남대로 428"
                             <p className="text-red-100/80 text-sm font-bold mb-2">Kakao Map API Key Missing</p>
                             <p className="text-white/40 text-[10px] leading-relaxed">
                                 Vercel 설정에 NEXT_PUBLIC_KAKAO_MAP_KEY가 없습니다.<br />
-                                환경 변수 등록 후 다시 배포해 주세요.
+                                1. Vercel Environment Variables에 키를 추가해 주세요.<br />
+                                2. 추가 후 반드시 재배포(Redeploy)가 필요합니다.
                             </p>
                         </>
                     ) : (
@@ -219,8 +223,13 @@ export default function KakaoMap({ address = "서울 강남구 강남대로 428"
                             <div className="w-20 h-20 mb-6 bg-amber-600/20 rounded-full flex items-center justify-center animate-pulse">
                                 <div className="w-10 h-10 bg-amber-600 rounded-full flex items-center justify-center text-white text-xl">☕</div>
                             </div>
-                            <p className="text-amber-100/60 text-sm font-black tracking-widest uppercase mb-2">Analyzing Local Market</p>
-                            <div className="flex gap-1">
+                            <p className="text-amber-100/60 text-sm font-black tracking-widest uppercase mb-2">Initializing Map...</p>
+                            <p className="text-white/40 text-[10px] leading-relaxed mb-4">
+                                5초 이상 지연될 경우 다음을 확인해 주세요:<br />
+                                [카카오 개발자 콘솔 &gt; 플랫폼]에<br />
+                                현재 도메인이 등록되어 있는지 확인이 필요합니다.
+                            </p>
+                            <div className="flex gap-1 justify-center">
                                 {[0, 1, 2].map(i => (
                                     <div key={i} className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.2}s` }} />
                                 ))}

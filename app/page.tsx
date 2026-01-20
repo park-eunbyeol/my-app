@@ -865,28 +865,55 @@ export default function CoffeeShopLanding() {
       </section>
 
       {/* Services Section */}
-      <section id="서비스" className="py-20 md:py-32 bg-[#F2EDE7]">
+      <section id="서비스" className="py-20 md:py-32 bg-[#F5F1EA]">
         <div className="max-w-7xl mx-auto px-6">
           <div className="text-center mb-20">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-black mb-6 tracking-tighter text-balance">맞춤형 마케팅 솔루션</h2>
-            <p className="text-amber-900/60 font-bold uppercase tracking-widest text-sm">Every tool you need for growth</p>
+            <p className="text-amber-900/60 font-bold uppercase tracking-widest text-sm text-[#8B7E74]">Every tool you need for growth</p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
             {[
-              { title: '카카오맵 상권 분석', desc: '카카오맵 기반의 정밀 상권 분석으로 잠재 고객을 우리 매장으로 유도합니다.', icon: '📍', color: 'bg-yellow-100' },
-              { title: '당근마켓 지역 광고', desc: '우리 매장 반경 500m 이내 주민들에게만 정확하게 쿠폰을 노출합니다.', icon: '🥕', color: 'bg-orange-100' },
-              { title: '인스타 핫플레이스 전략', desc: '무조건적인 광고가 아닌, 우리 동네 MZ세대가 방문하고 싶게 만듭니다.', icon: '📱', color: 'bg-purple-100' },
-              { title: '오프라인 방문 유도 CRM', desc: '한 번 온 손님이 단골이 되도록 스마트 스탬프와 자동 문자를 발송합니다.', icon: '👥', color: 'bg-blue-100' },
-              { title: '카카오 예약/채널 관리', desc: '카카오톡을 통해 손쉽게 예약하고 주문할 수 있는 원스톱 시스템을 구축합니다.', icon: '💬', color: 'bg-yellow-400/20' },
-              { title: '로컬 체험단 운영', desc: '활동이 활발한 지역 블로거들을 섭외하여 자연스러운 입소문을 만듭니다.', icon: '🏆', color: 'bg-pink-100' }
-            ].map((s, idx) => (
-              <div key={idx} className="p-8 md:p-10 rounded-[2.5rem] md:rounded-[3rem] bg-white shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 group">
-                <div className={`w-14 h-14 rounded-2xl ${s.color} flex items-center justify-center text-3xl mb-8 group-hover:scale-125 transition-transform duration-500`}>
-                  {s.icon}
-                </div>
-                <h3 className="text-xl font-black mb-4">{s.title}</h3>
-                <p className="text-gray-500 font-medium leading-relaxed">{s.desc}</p>
+              { title: '카카오맵 상권 분석', desc: '카카오맵 기반의 정밀 상권 분석으로 잠재 고객을 우리 매장으로 유도합니다.', icon: '📍', color: 'bg-[#FFF9E6]' },
+              { title: '당근마켓 지역 광고', desc: '우리 매장 반경 500m 이내 주민들에게만 정확하게 쿠폰을 노출합니다.', icon: '🥕', color: 'bg-[#FFF0E6]' },
+              {
+                title: '인스타 핫플레이스 전략',
+                desc: '무조건적인 광고가 아닌, 우리 동네 MZ세대가 방문하고 싶게 만듭니다.',
+                href: '/hotplace',
+                icon: (
+                  <div className="w-10 h-10 bg-black rounded-[6px] p-1.5 flex flex-col gap-0.5 relative overflow-hidden">
+                    <div className="flex gap-0.5 h-1/2">
+                      <div className="flex-1 bg-[#33D6FF] rounded-[1px]"></div>
+                      <div className="w-1/3 flex flex-col gap-0.5">
+                        <div className="flex-1 bg-[#33D6FF] rounded-[1px]"></div>
+                        <div className="flex-1 bg-[#33D6FF] rounded-[1px]"></div>
+                      </div>
+                    </div>
+                    <div className="flex gap-0.5 h-1/2">
+                      <div className="w-1/3 bg-[#33D6FF] rounded-[1px]"></div>
+                      <div className="flex-1 bg-[#33D6FF] rounded-[1px]"></div>
+                    </div>
+                    <div className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white/20"></div>
+                  </div>
+                ),
+                color: 'bg-[#F0E6FF]'
+              },
+              { title: '오프라인 방문 유도 CRM', desc: '한 번 온 손님이 단골이 되도록 스마트 스탬프와 자동 문자를 발송합니다.', icon: '👥', color: 'bg-[#E6F4FF]' },
+              { title: '카카오 예약/채널 관리', desc: '카카오톡을 통해 손쉽게 예약하고 주문할 수 있는 원스톱 시스템을 구축합니다.', icon: '💬', color: 'bg-[#FFFBE6]' },
+              { title: '로컬 체험단 운영', desc: '활동이 활발한 지역 블로거들을 섭외하여 자연스러운 입소문을 만듭니다.', icon: '🏆', color: 'bg-[#FFE6F0]', href: '/local-experience' }
+            ].map((s: any, idx) => (
+              <div key={idx} className="p-12 rounded-[5rem] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.04)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] hover:-translate-y-3 transition-all duration-700 group border border-black/5">
+                {s.href ? (
+                  <Link href={s.href} className={`w-20 h-20 rounded-[2rem] ${s.color} flex items-center justify-center text-3xl mb-12 group-hover:scale-110 transition-all duration-500 cursor-pointer shadow-lg shadow-black/5 hover:shadow-amber-200/50`}>
+                    {s.icon}
+                  </Link>
+                ) : (
+                  <div className={`w-20 h-20 rounded-[2rem] ${s.color} flex items-center justify-center text-3xl mb-12 group-hover:scale-110 transition-all duration-500`}>
+                    {s.icon}
+                  </div>
+                )}
+                <h3 className="text-2xl font-black mb-6 tracking-tight text-[#1A1A1A]">{s.title}</h3>
+                <p className="text-[#6B6B6B] font-medium leading-[1.8] text-lg">{s.desc}</p>
               </div>
             ))}
           </div>

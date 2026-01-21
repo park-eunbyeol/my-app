@@ -983,7 +983,7 @@ export default function HotPlacePage(props: {
                     </Link>
                 </div>
 
-                {/* Story Viewer Modal */}
+                {/* Story Viewer Modal - UPDATED WITH STORY NAVIGATION */}
                 <AnimatePresence>
                     {viewingStory && (
                         <motion.div
@@ -1028,15 +1028,47 @@ export default function HotPlacePage(props: {
                                         <button className="w-full py-4 bg-white text-black font-black rounded-2xl shadow-xl active:scale-95 transition-transform">공간 소식 듣기</button>
                                     </div>
                                 </div>
+
+                                {/* UPDATED NAVIGATION - Now moves between stories */}
                                 <div className="absolute inset-y-0 left-0 w-1/4 cursor-w-resize z-40" onClick={(e) => {
                                     e.stopPropagation();
-                                    if (currentSlideIndex > 0) { setCurrentSlideIndex(prev => prev - 1); setProgress(0); }
-                                    else setViewingStory(null);
+                                    if (currentSlideIndex > 0) {
+                                        // Go to previous slide in current story
+                                        setCurrentSlideIndex(prev => prev - 1);
+                                        setProgress(0);
+                                    } else {
+                                        // Go to previous story
+                                        const currentIndex = stories.findIndex(s => s.id === viewingStory.id);
+                                        if (currentIndex > 0) {
+                                            const prevStory = stories[currentIndex - 1];
+                                            setViewingStory(prevStory);
+                                            setSelectedStory(prevStory.id);
+                                            setCurrentSlideIndex(prevStory.slides.length - 1);
+                                            setProgress(0);
+                                        } else {
+                                            setViewingStory(null);
+                                        }
+                                    }
                                 }} />
                                 <div className="absolute inset-y-0 right-0 w-3/4 cursor-e-resize z-40" onClick={(e) => {
                                     e.stopPropagation();
-                                    if (currentSlideIndex < viewingStory.slides.length - 1) { setCurrentSlideIndex(prev => prev + 1); setProgress(0); }
-                                    else setViewingStory(null);
+                                    if (currentSlideIndex < viewingStory.slides.length - 1) {
+                                        // Go to next slide in current story
+                                        setCurrentSlideIndex(prev => prev + 1);
+                                        setProgress(0);
+                                    } else {
+                                        // Go to next story
+                                        const currentIndex = stories.findIndex(s => s.id === viewingStory.id);
+                                        if (currentIndex < stories.length - 1) {
+                                            const nextStory = stories[currentIndex + 1];
+                                            setViewingStory(nextStory);
+                                            setSelectedStory(nextStory.id);
+                                            setCurrentSlideIndex(0);
+                                            setProgress(0);
+                                        } else {
+                                            setViewingStory(null);
+                                        }
+                                    }
                                 }} />
                             </motion.div>
                         </motion.div>
@@ -1201,4 +1233,3 @@ export default function HotPlacePage(props: {
         </div>
     );
 }
-

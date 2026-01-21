@@ -52,9 +52,16 @@ export default function OwnerDashboardPage() {
     const [showApplicantsModal, setShowApplicantsModal] = useState<boolean>(false);
     const [showReviewsModal, setShowReviewsModal] = useState<boolean>(false);
     const [showEditModal, setShowEditModal] = useState<boolean>(false);
+    const [showDeleteModal, setShowDeleteModal] = useState<boolean>(false);
     const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
     const [modalOfferType, setModalOfferType] = useState<OfferType>('menu');
     const [modalPlatform, setModalPlatform] = useState<PlatformType>('instagram');
+
+    // New campaign form data
+    const [newCampaignTitle, setNewCampaignTitle] = useState('');
+    const [newCampaignDescription, setNewCampaignDescription] = useState('');
+    const [newCampaignSpots, setNewCampaignSpots] = useState(5);
+    const [newCampaignDeadline, setNewCampaignDeadline] = useState('');
 
     // Initial data for Campaign 1 (주말 브런치 세트)
     const initialApplicants: Applicant[] = [
@@ -183,6 +190,112 @@ export default function OwnerDashboardPage() {
     const getCampaignApplicants = (campaignId: number) =>
         applicants.filter(a => a.campaignId === campaignId);
 
+    // Campaigns with localStorage
+    const initialCampaigns: Campaign[] = [
+        {
+            id: 1,
+            title: "주말 브런치 세트 체험단",
+            status: "진행중",
+            applications: 0,
+            selected: 0,
+            spots: 5,
+            visited: 0,
+            reviewed: 0,
+            deadline: "2024.02.25",
+            daysLeft: 4,
+            avgRating: 4.5
+        },
+        {
+            id: 2,
+            title: "신메뉴 시그니처 라떼",
+            status: "모집중",
+            applications: 0,
+            selected: 0,
+            spots: 5,
+            visited: 0,
+            reviewed: 0,
+            deadline: "2024.02.28",
+            daysLeft: 7
+        }
+    ];
+
+    const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const saved = localStorage.getItem('cafe-campaigns');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        return parsed;
+                    }
+                }
+            } catch (e) {
+                console.error('Failed to parse campaigns from localStorage', e);
+            }
+            localStorage.removeItem('cafe-campaigns');
+        }
+        return initialCampaigns;
+    });
+
+    // Save campaigns to localStorage
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('cafe-campaigns', JSON.stringify(campaigns));
+        }
+    }, [campaigns]);
+
+    // Update campaigns with dynamic applicant counts
+    const campaignsWithCounts = campaigns.map(campaign => ({
+        ...campaign,
+        applications: getCampaignApplicants(campaign.id).length,
+        selected: getApprovedApplicants(campaign.id).length,
+        visited: getApprovedApplicants(campaign.id).length,
+        reviewed: getApprovedWithReviews(campaign.id).length,
+    }));
+
+    const handleCreateCampaign = () => {
+        if (!newCampaignTitle || !newCampaignDeadline) {
+            alert('캠페인 제목과 마감일을 입력해주세요!');
+            return;
+        }
+
+        const newCampaign: Campaign = {
+            id: campaigns.length + 1,
+            title: newCampaignTitle,
+            status: "모집중",
+            applications: 0,
+            selected: 0,
+            spots: newCampaignSpots,
+            visited: 0,
+            reviewed: 0,
+            deadline: newCampaignDeadline,
+            daysLeft: Math.ceil((new Date(newCampaignDeadline).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)),
+        };
+
+        setCampaigns(prev => [...prev, newCampaign]);
+
+        // Reset form
+        setNewCampaignTitle('');
+        setNewCampaignDescription('');
+        setNewCampaignSpots(5);
+        setNewCampaignDeadline('');
+        setModalOfferType('menu');
+        setModalPlatform('instagram');
+        setShowCreateModal(false);
+
+        alert('체험단이 등록되었습니다! 🎉');
+        setActiveTab('campaigns');
+    };
+
+    const handleDeleteCampaign = () => {
+        if (!selectedCampaign) return;
+
+        setCampaigns(prev => prev.filter(c => c.id !== selectedCampaign.id));
+        setShowDeleteModal(false);
+        setSelectedCampaign(null);
+        alert('캠페인이 삭제되었습니다.');
+    };
+
     useEffect(() => {
         setMounted(true);
     }, []);
@@ -212,34 +325,6 @@ export default function OwnerDashboardPage() {
         { id: 2, reviewer: '이서연', campaign: '신메뉴 라떼 체험', date: '2024.02.22', time: '2:00 PM', status: '확정' },
         { id: 3, reviewer: '박지훈', campaign: '디저트 세트 체험', date: '2024.02.23', time: '3:00 PM', status: '대기' },
         { id: 4, reviewer: '최유진', campaign: '브런치 세트 체험', date: '2024.02.24', time: '12:00 PM', status: '확정' }
-    ];
-
-    const campaigns = [
-        {
-            id: 1,
-            title: "주말 브런치 세트 체험단",
-            status: "진행중",
-            applications: getCampaignApplicants(1).length,
-            selected: getApprovedApplicants(1).length,
-            spots: 5,
-            visited: getApprovedApplicants(1).length,
-            reviewed: getApprovedWithReviews(1).length,
-            deadline: "2024.02.25",
-            daysLeft: 4,
-            avgRating: 4.5
-        },
-        {
-            id: 2,
-            title: "신메뉴 시그니처 라떼",
-            status: "모집중",
-            applications: getCampaignApplicants(2).length,
-            selected: getApprovedApplicants(2).length,
-            spots: 5,
-            visited: getApprovedApplicants(2).length,
-            reviewed: getApprovedWithReviews(2).length,
-            deadline: "2024.02.28",
-            daysLeft: 7
-        }
     ];
 
     const analyticsData = {
@@ -309,8 +394,8 @@ export default function OwnerDashboardPage() {
                             <button
                                 onClick={() => setActiveTab('overview')}
                                 className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'overview'
-                                    ? 'bg-orange-50 text-orange-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-orange-50 text-orange-600'
+                                        : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 📊 대시보드
@@ -318,8 +403,8 @@ export default function OwnerDashboardPage() {
                             <button
                                 onClick={() => setActiveTab('campaigns')}
                                 className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-between ${activeTab === 'campaigns'
-                                    ? 'bg-orange-50 text-orange-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-orange-50 text-orange-600'
+                                        : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 <span>📋 캠페인 관리</span>
@@ -332,8 +417,8 @@ export default function OwnerDashboardPage() {
                             <button
                                 onClick={() => setActiveTab('analytics')}
                                 className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'analytics'
-                                    ? 'bg-orange-50 text-orange-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-orange-50 text-orange-600'
+                                        : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 📈 분석
@@ -341,8 +426,8 @@ export default function OwnerDashboardPage() {
                             <button
                                 onClick={() => setActiveTab('messages')}
                                 className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-between ${activeTab === 'messages'
-                                    ? 'bg-orange-50 text-orange-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-orange-50 text-orange-600'
+                                        : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 <span>💬 메시지</span>
@@ -355,8 +440,8 @@ export default function OwnerDashboardPage() {
                             <button
                                 onClick={() => setActiveTab('settings')}
                                 className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'settings'
-                                    ? 'bg-orange-50 text-orange-600'
-                                    : 'text-gray-600 hover:bg-gray-50'
+                                        ? 'bg-orange-50 text-orange-600'
+                                        : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 ⚙️ 설정
@@ -491,8 +576,8 @@ export default function OwnerDashboardPage() {
                                                     <div className="flex items-center justify-between mb-2">
                                                         <span className="font-bold">{schedule.reviewer}</span>
                                                         <span className={`text-xs px-2 py-1 rounded-full ${schedule.status === '확정'
-                                                            ? 'bg-green-100 text-green-700'
-                                                            : 'bg-yellow-100 text-yellow-700'
+                                                                ? 'bg-green-100 text-green-700'
+                                                                : 'bg-yellow-100 text-yellow-700'
                                                             }`}>
                                                             {schedule.status}
                                                         </span>
@@ -523,21 +608,28 @@ export default function OwnerDashboardPage() {
                                 </div>
 
                                 <div className="space-y-6">
-                                    {campaigns.map((campaign) => (
+                                    {campaignsWithCounts.map((campaign) => (
                                         <div key={campaign.id} className="bg-white rounded-2xl border border-gray-100 p-6">
                                             <div className="flex items-start justify-between mb-4">
                                                 <div>
                                                     <h3 className="text-xl font-black mb-2">{campaign.title}</h3>
                                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${campaign.status === '진행중'
-                                                        ? 'bg-blue-100 text-blue-700'
-                                                        : 'bg-green-100 text-green-700'
+                                                            ? 'bg-blue-100 text-blue-700'
+                                                            : 'bg-green-100 text-green-700'
                                                         }`}>
                                                         {campaign.status}
                                                     </span>
                                                 </div>
-                                                <button className="text-gray-400 hover:text-gray-600">
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedCampaign(campaign);
+                                                        setShowDeleteModal(true);
+                                                    }}
+                                                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition-all"
+                                                    title="캠페인 삭제"
+                                                >
                                                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                     </svg>
                                                 </button>
                                             </div>
@@ -824,6 +916,8 @@ export default function OwnerDashboardPage() {
                                         <input
                                             type="text"
                                             placeholder="예: 신메뉴 브런치 세트 체험단 모집"
+                                            value={newCampaignTitle}
+                                            onChange={(e) => setNewCampaignTitle(e.target.value)}
                                             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
                                         />
                                     </div>
@@ -836,6 +930,8 @@ export default function OwnerDashboardPage() {
                                         <textarea
                                             placeholder="우리 카페와 체험단에 대해 소개해주세요"
                                             rows={4}
+                                            value={newCampaignDescription}
+                                            onChange={(e) => setNewCampaignDescription(e.target.value)}
                                             className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
                                         />
                                     </div>
@@ -850,8 +946,8 @@ export default function OwnerDashboardPage() {
                                                 type="button"
                                                 onClick={() => setModalOfferType('menu')}
                                                 className={`p-4 border-2 rounded-xl transition-all ${modalOfferType === 'menu'
-                                                    ? 'border-orange-500 bg-orange-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-orange-500 bg-orange-50'
+                                                        : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="text-2xl mb-1">🍽️</div>
@@ -861,8 +957,8 @@ export default function OwnerDashboardPage() {
                                                 type="button"
                                                 onClick={() => setModalOfferType('discount')}
                                                 className={`p-4 border-2 rounded-xl transition-all ${modalOfferType === 'discount'
-                                                    ? 'border-orange-500 bg-orange-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-orange-500 bg-orange-50'
+                                                        : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="text-2xl mb-1">💰</div>
@@ -872,8 +968,8 @@ export default function OwnerDashboardPage() {
                                                 type="button"
                                                 onClick={() => setModalOfferType('free')}
                                                 className={`p-4 border-2 rounded-xl transition-all ${modalOfferType === 'free'
-                                                    ? 'border-orange-500 bg-orange-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-orange-500 bg-orange-50'
+                                                        : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="text-2xl mb-1">🎁</div>
@@ -913,7 +1009,8 @@ export default function OwnerDashboardPage() {
                                             </label>
                                             <input
                                                 type="number"
-                                                defaultValue="5"
+                                                value={newCampaignSpots}
+                                                onChange={(e) => setNewCampaignSpots(parseInt(e.target.value) || 1)}
                                                 min="1"
                                                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
                                             />
@@ -924,6 +1021,8 @@ export default function OwnerDashboardPage() {
                                             </label>
                                             <input
                                                 type="date"
+                                                value={newCampaignDeadline}
+                                                onChange={(e) => setNewCampaignDeadline(e.target.value)}
                                                 className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
                                             />
                                         </div>
@@ -939,8 +1038,8 @@ export default function OwnerDashboardPage() {
                                                 type="button"
                                                 onClick={() => setModalPlatform('instagram')}
                                                 className={`flex-1 p-3 border-2 rounded-xl transition-all ${modalPlatform === 'instagram'
-                                                    ? 'border-orange-500 bg-orange-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-orange-500 bg-orange-50'
+                                                        : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="text-xl mb-1">📸</div>
@@ -950,8 +1049,8 @@ export default function OwnerDashboardPage() {
                                                 type="button"
                                                 onClick={() => setModalPlatform('blog')}
                                                 className={`flex-1 p-3 border-2 rounded-xl transition-all ${modalPlatform === 'blog'
-                                                    ? 'border-orange-500 bg-orange-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-orange-500 bg-orange-50'
+                                                        : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="text-xl mb-1">✍️</div>
@@ -961,8 +1060,8 @@ export default function OwnerDashboardPage() {
                                                 type="button"
                                                 onClick={() => setModalPlatform('youtube')}
                                                 className={`flex-1 p-3 border-2 rounded-xl transition-all ${modalPlatform === 'youtube'
-                                                    ? 'border-orange-500 bg-orange-50'
-                                                    : 'border-gray-200 hover:border-gray-300'
+                                                        ? 'border-orange-500 bg-orange-50'
+                                                        : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="text-xl mb-1">🎥</div>
@@ -981,10 +1080,7 @@ export default function OwnerDashboardPage() {
                                         취소
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            alert('체험단이 등록되었습니다! 🎉');
-                                            setShowCreateModal(false);
-                                        }}
+                                        onClick={handleCreateCampaign}
                                         className="flex-1 px-6 py-3 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 transition-colors"
                                     >
                                         등록하기
@@ -1035,10 +1131,10 @@ export default function OwnerDashboardPage() {
                                                 )}
                                             </div>
                                             <span className={`px-3 py-1 rounded-full text-xs font-bold ${applicant.status === '승인됨'
-                                                ? 'bg-green-100 text-green-700'
-                                                : applicant.status === '거절됨'
-                                                    ? 'bg-red-100 text-red-700'
-                                                    : 'bg-yellow-100 text-yellow-700'
+                                                    ? 'bg-green-100 text-green-700'
+                                                    : applicant.status === '거절됨'
+                                                        ? 'bg-red-100 text-red-700'
+                                                        : 'bg-yellow-100 text-yellow-700'
                                                 }`}>
                                                 {applicant.status}
                                             </span>
@@ -1260,6 +1356,44 @@ export default function OwnerDashboardPage() {
                                         className="flex-1 px-6 py-3 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 transition-colors"
                                     >
                                         저장하기
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Campaign Confirmation Modal */}
+            {showDeleteModal && selectedCampaign && (
+                <div className="fixed inset-0 z-50 overflow-y-auto">
+                    <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                        <div
+                            className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
+                            onClick={() => setShowDeleteModal(false)}
+                        />
+
+                        <div className="relative inline-block w-full max-w-md px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-3xl shadow-xl sm:my-8 sm:align-middle sm:p-8">
+                            <div className="text-center">
+                                <div className="text-6xl mb-4">⚠️</div>
+                                <h2 className="text-2xl font-black mb-2">캠페인을 삭제하시겠습니까?</h2>
+                                <p className="text-gray-500 mb-2">"{selectedCampaign.title}"</p>
+                                <p className="text-sm text-red-500 mb-6">
+                                    삭제된 캠페인은 복구할 수 없습니다.
+                                </p>
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowDeleteModal(false)}
+                                        className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                                    >
+                                        취소
+                                    </button>
+                                    <button
+                                        onClick={handleDeleteCampaign}
+                                        className="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 transition-colors"
+                                    >
+                                        삭제하기
                                     </button>
                                 </div>
                             </div>

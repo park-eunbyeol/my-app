@@ -180,30 +180,20 @@ export default function HotPlacePage(props: {
         },
         {
             id: 2,
-            video: "/videos/cafe-2.webm?v=5",
-            fallbackImage: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?q=80&w=800",
-            location: "연남동 쉐이크 하우스",
-            user: "@cafe_vibe_kr",
-            desc: "커피 한 잔의 여유가 필요한 오후. 이곳만의 특별한 원두를 만나보세요. 🌿 #공간디자인 #연남동핫플"
+            video: "/videos/우유 도넛.mp4?v=5",
+            fallbackImage: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?q=80&w=800",
+            location: "한남동 도넛 하우스",
+            user: "@donut_lover",
+            desc: "폭신폭신한 우유 생크림 도넛의 환상적인 맛. 한 입 베어 물면 행복이 퍼려요. 🍩 #도넛맛집 #한남동카페"
         },
         {
             id: 3,
-            video: "/videos/cafe-3.webm?v=5",
-            fallbackImage: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=800",
-            location: "한남동 디저트 빌리지",
-            user: "@dessert_master",
-            desc: "달콤한 디저트와 향긋한 커피의 완벽한 조화. 당신의 오늘을 달콤하게 채워줄게요. 🍰☕️ #한남동맛집 #디저트카페"
+            video: "/videos/strawberry_cake.mp4.mp4?v=6",
+            location: "압구정 케이크 부티크",
+            user: "@cake_artisan",
+            desc: "신선한 딸기가 듬뿍 올라간 생크림 케이크. 입안 가득 퍼지는 상큼달콤한 행복을 영상으로 만나보세요. 🍓🍰 #딸기케이크 #과일케이크"
         }
     ];
-
-
-
-
-
-
-
-
-
 
 
     const [items, setItems] = useState([

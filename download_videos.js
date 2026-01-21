@@ -7,7 +7,9 @@ const files = [
     { title: "File:Kaffe_ur_maskin.webm", output: "cafe-2.webm" },
     // "Showreel chocolate & caramel by Will van der Vlugt.webm" seems like a high-quality product montage.
     // This fits "dessert only" / "only food" much better than a cooking tutorial.
-    { title: "File:Showreel_chocolate_&_caramel_by_Will_van_der_Vlugt.webm", output: "cafe-3.webm" }
+    { title: "File:Showreel_chocolate_&_caramel_by_Will_van_der_Vlugt.webm", output: "cafe-3.webm" },
+    // Strawberry dessert video from Pixabay - direct download
+    { url: "https://cdn.pixabay.com/video/2020/06/18/42697-431869076_large.mp4", output: "strawberry_cake.mp4" }
 ];
 
 const dir = path.join(__dirname, 'public', 'videos');
@@ -17,7 +19,23 @@ if (!fs.existsSync(dir)) {
 
 function download(url, filePath) {
     const file = fs.createWriteStream(filePath);
-    https.get(url, { headers: { 'User-Agent': 'CoffeeApp/1.0' } }, (response) => {
+    const protocol = url.startsWith('https') ? https : require('http');
+
+    protocol.get(url, { headers: { 'User-Agent': 'CoffeeApp/1.0' } }, (response) => {
+        // Handle redirects
+        if (response.statusCode === 301 || response.statusCode === 302 || response.statusCode === 307 || response.statusCode === 308) {
+            file.close();
+            fs.unlinkSync(filePath); // Delete the empty file
+            download(response.headers.location, filePath); // Follow redirect
+            return;
+        }
+
+        if (response.statusCode !== 200) {
+            console.error(`Failed to download ${url}: HTTP ${response.statusCode}`);
+            file.close();
+            return;
+        }
+
         response.pipe(file);
         file.on('finish', () => {
             file.close();
@@ -25,10 +43,20 @@ function download(url, filePath) {
         });
     }).on('error', (err) => {
         console.error(`Error downloading file: ${err.message}`);
+        file.close();
+        fs.unlinkSync(filePath);
     });
 }
 
 function processFile(fileInfo) {
+    // If direct URL is provided, download directly
+    if (fileInfo.url) {
+        console.log(`Downloading from direct URL: ${fileInfo.url}`);
+        download(fileInfo.url, path.join(dir, fileInfo.output));
+        return;
+    }
+
+    // Otherwise, use Wikimedia API
     const apiUrl = `https://commons.wikimedia.org/w/api.php?action=query&titles=${encodeURIComponent(fileInfo.title)}&prop=imageinfo&iiprop=url&format=json`;
 
     https.get(apiUrl, { headers: { 'User-Agent': 'CoffeeApp/1.0' } }, (res) => {
@@ -56,3 +84,4 @@ function processFile(fileInfo) {
 }
 
 files.forEach(processFile);
+

@@ -4,57 +4,6 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder_key');
 
-// 스티비 공개 구독 API 엔드포인트 (주소록 466239 전용)
-const STIBEE_PUBLIC_API_URL = "https://stibee.com/api/v1.0/lists/kk3NKQX6RorIi23gl1_fgSoapKIgTg==/public/subscribers";
-
-/**
- * 스티비 공개 API를 이용한 구독자 자동 등록
- */
-async function subscribeToStibee(email: string, name?: string) {
-    try {
-        console.log(`[Stibee Sync] Attempting to subscribe: ${email}`);
-
-        // 스티비 공개 API는 보통 form-data 형식을 기대함
-        const formData = new URLSearchParams();
-        formData.append('email', email);
-        if (name) formData.append('name', name);
-        // 필수 동의 항목 처리 (HTML 폼 기반)
-        formData.append('stb_policy', 'stb_policy_true');
-
-        const response = await fetch(STIBEE_PUBLIC_API_URL, {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Accept': 'application/json',
-                'Referer': 'https://page.stibee.com/subscriptions/466239', // 정확한 구독 페이지 주소
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-            },
-        });
-
-        const status = response.status;
-        const text = await response.text();
-        console.log(`[Stibee Sync] Status: ${status}`);
-        console.log(`[Stibee Sync] Raw Response: ${text.substring(0, 500)}`);
-
-        try {
-            const json = JSON.parse(text);
-            if (json.code === '0000' || response.ok) {
-                console.log('[Stibee Sync] Success reported by Stibee');
-            } else {
-                console.warn('[Stibee Sync] Error response:', json);
-            }
-            return json;
-        } catch (e) {
-            console.error('[Stibee Sync] Parse error or non-JSON:', text);
-            return { raw: text };
-        }
-    } catch (error) {
-        console.error('[Stibee Sync] Network/Fetch Error:', error);
-        return null;
-    }
-}
-
 // GET: 사용자 목록 조회
 export async function GET(request: Request) {
     console.log('[Users API] GET request received');
@@ -285,12 +234,6 @@ export async function POST(request: Request) {
             }
         } catch (emailError: any) {
             console.error('[Users API] Email notification crash:', emailError.message);
-        }
-
-        // 스티비 자동 동기화 (뉴스레터 신청 시 또는 전체 신청 시)
-        // 여기서는 뉴스레터 신청(source === 'newsletter')일 때 우선 실행
-        if (source === 'newsletter' || agreeMarketing) {
-            await subscribeToStibee(email, name);
         }
 
         return NextResponse.json({

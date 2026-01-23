@@ -899,7 +899,7 @@ export default function CoffeeShopLanding() {
                 color: 'bg-[#F0E6FF]'
               },
               { title: '오프라인 방문 유도 CRM', desc: '한 번 온 손님이 단골이 되도록 스마트 스탬프와 자동 문자를 발송합니다.', icon: '👥', color: 'bg-[#E6F4FF]' },
-              { title: '카카오 예약/채널 관리', desc: '카카오톡을 통해 손쉽게 예약하고 주문할 수 있는 원스톱 시스템을 구축합니다.', icon: '💬', color: 'bg-[#FFFBE6]' },
+              { title: '카카오 예약/채널 관리', desc: '카카오톡을 통해 손쉽게 예약하고 주문할 수 있는 원스톱 시스템을 구축합니다.', icon: '💬', color: 'bg-[#FFFBE6]', href: '/kakao-management' },
               { title: '로컬 체험단 운영', desc: '활동이 활발한 지역 블로거들을 섭외하여 자연스러운 입소문을 만듭니다.', icon: '🏆', color: 'bg-[#FFE6F0]', href: '/local-experience' }
             ].map((s: any, idx) => (
               <div key={idx} className="p-12 rounded-[5rem] bg-white shadow-[0_20px_50px_rgba(0,0,0,0.04)] hover:shadow-[0_40px_80px_rgba(0,0,0,0.08)] hover:-translate-y-3 transition-all duration-700 group border border-black/5">

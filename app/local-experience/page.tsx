@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 
 type TabType = 'overview' | 'campaigns' | 'analytics' | 'messages' | 'settings';
 type OfferType = 'menu' | 'discount' | 'free';
@@ -45,6 +44,17 @@ interface Review {
     reach: string;
 }
 
+interface Message {
+    id: number;
+    name: string;
+    lastMessage: string;
+    time: string;
+    unread: boolean;
+    avatar: string;
+    myReply?: string;
+    repliedAt?: string;
+}
+
 export default function OwnerDashboardPage() {
     const [mounted, setMounted] = useState<boolean>(false);
     const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -56,6 +66,8 @@ export default function OwnerDashboardPage() {
     const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
     const [modalOfferType, setModalOfferType] = useState<OfferType>('menu');
     const [modalPlatform, setModalPlatform] = useState<PlatformType>('instagram');
+    const [selectedMessage, setSelectedMessage] = useState<any>(null);
+    const [newMessageText, setNewMessageText] = useState('');
 
     // New campaign form data
     const [newCampaignTitle, setNewCampaignTitle] = useState('');
@@ -76,6 +88,10 @@ export default function OwnerDashboardPage() {
         { id: 8, name: '한준호', followers: '4.2K', platform: '유튜브', status: '승인됨', avatar: 'https://i.pravatar.cc/150?img=13', hasReviewed: false, campaignId: 2 },
         { id: 9, name: '송하은', followers: '2.9K', platform: '인스타그램', status: '대기중', avatar: 'https://i.pravatar.cc/150?img=16', hasReviewed: false, campaignId: 2 },
         { id: 10, name: '임시우', followers: '5.1K', platform: '블로그', status: '대기중', avatar: 'https://i.pravatar.cc/150?img=24', hasReviewed: false, campaignId: 2 },
+        // Campaign 3 (디저트 세트 체험단)
+        { id: 11, name: '조예린', followers: '7.2K', platform: '인스타그램', status: '대기중', avatar: 'https://i.pravatar.cc/150?img=25', hasReviewed: false, campaignId: 3 },
+        { id: 12, name: '배성훈', followers: '4.1K', platform: '블로그', status: '대기중', avatar: 'https://i.pravatar.cc/150?img=28', hasReviewed: false, campaignId: 3 },
+        { id: 13, name: '안지현', followers: '3.5K', platform: '인스타그램', status: '대기중', avatar: 'https://i.pravatar.cc/150?img=30', hasReviewed: false, campaignId: 3 },
     ];
 
     const initialReviews: Review[] = [
@@ -87,7 +103,7 @@ export default function OwnerDashboardPage() {
     const [applicants, setApplicants] = useState<Applicant[]>(() => {
         if (typeof window !== 'undefined') {
             try {
-                const saved = localStorage.getItem('cafe-applicants');
+                const saved = localStorage.getItem('cafe-applicants-v2');
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     // Check if data is valid and has campaignId property
@@ -99,7 +115,7 @@ export default function OwnerDashboardPage() {
                 console.error('Failed to parse applicants from localStorage', e);
             }
             // Clear invalid data and use initial
-            localStorage.removeItem('cafe-applicants');
+            localStorage.removeItem('cafe-applicants-v2');
         }
         return initialApplicants;
     });
@@ -107,7 +123,7 @@ export default function OwnerDashboardPage() {
     const [reviews, setReviews] = useState<Review[]>(() => {
         if (typeof window !== 'undefined') {
             try {
-                const saved = localStorage.getItem('cafe-reviews');
+                const saved = localStorage.getItem('cafe-reviews-v2');
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     // Check if data is valid and has campaignId property
@@ -119,7 +135,7 @@ export default function OwnerDashboardPage() {
                 console.error('Failed to parse reviews from localStorage', e);
             }
             // Clear invalid data and use initial
-            localStorage.removeItem('cafe-reviews');
+            localStorage.removeItem('cafe-reviews-v2');
         }
         return initialReviews;
     });
@@ -127,13 +143,13 @@ export default function OwnerDashboardPage() {
     // Save to localStorage whenever applicants or reviews change
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            localStorage.setItem('cafe-applicants', JSON.stringify(applicants));
+            localStorage.setItem('cafe-applicants-v2', JSON.stringify(applicants));
         }
     }, [applicants]);
 
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            localStorage.setItem('cafe-reviews', JSON.stringify(reviews));
+            localStorage.setItem('cafe-reviews-v2', JSON.stringify(reviews));
         }
     }, [reviews]);
 
@@ -201,8 +217,8 @@ export default function OwnerDashboardPage() {
             spots: 5,
             visited: 0,
             reviewed: 0,
-            deadline: "2024.02.25",
-            daysLeft: 4,
+            deadline: "2024.02.15",
+            daysLeft: -3,
             avgRating: 4.5
         },
         {
@@ -216,13 +232,25 @@ export default function OwnerDashboardPage() {
             reviewed: 0,
             deadline: "2024.02.28",
             daysLeft: 7
+        },
+        {
+            id: 3,
+            title: "디저트 세트 체험단",
+            status: "모집중",
+            applications: 0,
+            selected: 0,
+            spots: 8,
+            visited: 0,
+            reviewed: 0,
+            deadline: "2024.03.05",
+            daysLeft: 11
         }
     ];
 
     const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
         if (typeof window !== 'undefined') {
             try {
-                const saved = localStorage.getItem('cafe-campaigns');
+                const saved = localStorage.getItem('cafe-campaigns-v2');
                 if (saved) {
                     const parsed = JSON.parse(saved);
                     if (Array.isArray(parsed) && parsed.length > 0) {
@@ -232,7 +260,7 @@ export default function OwnerDashboardPage() {
             } catch (e) {
                 console.error('Failed to parse campaigns from localStorage', e);
             }
-            localStorage.removeItem('cafe-campaigns');
+            localStorage.removeItem('cafe-campaigns-v2');
         }
         return initialCampaigns;
     });
@@ -240,7 +268,7 @@ export default function OwnerDashboardPage() {
     // Save campaigns to localStorage
     useEffect(() => {
         if (typeof window !== 'undefined') {
-            localStorage.setItem('cafe-campaigns', JSON.stringify(campaigns));
+            localStorage.setItem('cafe-campaigns-v2', JSON.stringify(campaigns));
         }
     }, [campaigns]);
 
@@ -306,8 +334,8 @@ export default function OwnerDashboardPage() {
         weeklyReviews: 8,
         totalReach: "24.5K",
         expectedReturns: 12,
-        activeCampaigns: 2,
-        pendingApprovals: 3,
+        activeCampaigns: 3,
+        pendingApprovals: 5,
         pendingReviews: 2,
         upcomingVisits: 4
     };
@@ -337,12 +365,33 @@ export default function OwnerDashboardPage() {
         bestDayOfWeek: "토요일"
     };
 
-    const messages = [
-        { id: 1, name: '김민지', lastMessage: '네 감사합니다! 토요일 11시에 방문할게요', time: '10분 전', unread: true, avatar: 'https://i.pravatar.cc/150?img=1' },
-        { id: 2, name: '이서연', lastMessage: '사진 많이 찍어서 리뷰 남기겠습니다!', time: '1시간 전', unread: true, avatar: 'https://i.pravatar.cc/150?img=5' },
-        { id: 3, name: '박지훈', lastMessage: '주차는 가능한가요?', time: '3시간 전', unread: false, avatar: 'https://i.pravatar.cc/150?img=12' },
-        { id: 4, name: '최유진', lastMessage: '체험단 신청했습니다', time: '1일 전', unread: false, avatar: 'https://i.pravatar.cc/150?img=20' }
+    const initialMessages = [
+        { id: 1, name: '김민지', lastMessage: '네 감사합니다! 토요일 11시에 방문할게요', time: '10분 전', unread: false, avatar: 'https://i.pravatar.cc/150?img=1', myReply: '네! 토요일에 뵙겠습니다 😊', repliedAt: '5분 전' },
+        { id: 2, name: '이서연', lastMessage: '사진 많이 찍어서 리뷰 남기겠습니다!', time: '1시간 전', unread: false, avatar: 'https://i.pravatar.cc/150?img=5', myReply: '감사합니다! 좋은 리뷰 부탁드려요 ☕', repliedAt: '50분 전' },
+        { id: 3, name: '박지훈', lastMessage: '주차는 가능한가요?', time: '3시간 전', unread: false, avatar: 'https://i.pravatar.cc/150?img=12', myReply: '네, 매장 뒤편에 주차 공간 있습니다!', repliedAt: '2시간 전' },
+        { id: 4, name: '최유진', lastMessage: '체험단 신청했습니다', time: '1일 전', unread: false, avatar: 'https://i.pravatar.cc/150?img=20', myReply: '신청 감사합니다! 곧 결과 안내드리겠습니다', repliedAt: '1일 전' }
     ];
+
+    const [messages, setMessages] = useState<Message[]>(() => {
+        if (typeof window !== 'undefined') {
+            try {
+                const saved = localStorage.getItem('cafe-messages-v2');
+                if (saved) {
+                    return JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error('Failed to parse messages from localStorage', e);
+            }
+        }
+        return initialMessages;
+    });
+
+    // Save messages to localStorage
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('cafe-messages-v2', JSON.stringify(messages));
+        }
+    }, [messages]);
 
     if (!mounted) return null;
 
@@ -394,8 +443,8 @@ export default function OwnerDashboardPage() {
                             <button
                                 onClick={() => setActiveTab('overview')}
                                 className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'overview'
-                                        ? 'bg-orange-50 text-orange-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-orange-50 text-orange-600'
+                                    : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 📊 대시보드
@@ -403,8 +452,8 @@ export default function OwnerDashboardPage() {
                             <button
                                 onClick={() => setActiveTab('campaigns')}
                                 className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-between ${activeTab === 'campaigns'
-                                        ? 'bg-orange-50 text-orange-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-orange-50 text-orange-600'
+                                    : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 <span>📋 캠페인 관리</span>
@@ -417,8 +466,8 @@ export default function OwnerDashboardPage() {
                             <button
                                 onClick={() => setActiveTab('analytics')}
                                 className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'analytics'
-                                        ? 'bg-orange-50 text-orange-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-orange-50 text-orange-600'
+                                    : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 📈 분석
@@ -426,8 +475,8 @@ export default function OwnerDashboardPage() {
                             <button
                                 onClick={() => setActiveTab('messages')}
                                 className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-between ${activeTab === 'messages'
-                                        ? 'bg-orange-50 text-orange-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-orange-50 text-orange-600'
+                                    : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 <span>💬 메시지</span>
@@ -440,8 +489,8 @@ export default function OwnerDashboardPage() {
                             <button
                                 onClick={() => setActiveTab('settings')}
                                 className={`w-full text-left px-4 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'settings'
-                                        ? 'bg-orange-50 text-orange-600'
-                                        : 'text-gray-600 hover:bg-gray-50'
+                                    ? 'bg-orange-50 text-orange-600'
+                                    : 'text-gray-600 hover:bg-gray-50'
                                     }`}
                             >
                                 ⚙️ 설정
@@ -576,8 +625,8 @@ export default function OwnerDashboardPage() {
                                                     <div className="flex items-center justify-between mb-2">
                                                         <span className="font-bold">{schedule.reviewer}</span>
                                                         <span className={`text-xs px-2 py-1 rounded-full ${schedule.status === '확정'
-                                                                ? 'bg-green-100 text-green-700'
-                                                                : 'bg-yellow-100 text-yellow-700'
+                                                            ? 'bg-green-100 text-green-700'
+                                                            : 'bg-yellow-100 text-yellow-700'
                                                             }`}>
                                                             {schedule.status}
                                                         </span>
@@ -614,8 +663,8 @@ export default function OwnerDashboardPage() {
                                                 <div>
                                                     <h3 className="text-xl font-black mb-2">{campaign.title}</h3>
                                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${campaign.status === '진행중'
-                                                            ? 'bg-blue-100 text-blue-700'
-                                                            : 'bg-green-100 text-green-700'
+                                                        ? 'bg-blue-100 text-blue-700'
+                                                        : 'bg-green-100 text-green-700'
                                                         }`}>
                                                         {campaign.status}
                                                     </span>
@@ -653,19 +702,29 @@ export default function OwnerDashboardPage() {
                                                 </div>
                                                 <div className="bg-gray-50 p-3 rounded-xl">
                                                     <p className="text-xs text-gray-400 mb-1">마감</p>
-                                                    <p className="text-xl font-black text-red-600">D-{campaign.daysLeft}</p>
+                                                    <p className={`text-xl font-black ${campaign.daysLeft <= 0 ? 'text-gray-600' : 'text-red-600'}`}>
+                                                        {campaign.daysLeft <= 0 ? '마감' : `D-${campaign.daysLeft}`}
+                                                    </p>
                                                 </div>
                                             </div>
 
                                             <div className="mb-4">
                                                 <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
                                                     <span>진행률</span>
-                                                    <span>{Math.round((campaign.visited / campaign.selected) * 100)}%</span>
+                                                    <span>
+                                                        {campaign.selected > 0
+                                                            ? Math.round((campaign.visited / campaign.selected) * 100)
+                                                            : 0}%
+                                                    </span>
                                                 </div>
                                                 <div className="w-full bg-gray-100 rounded-full h-2">
                                                     <div
                                                         className="bg-orange-500 h-2 rounded-full transition-all"
-                                                        style={{ width: `${(campaign.visited / campaign.selected) * 100}%` }}
+                                                        style={{
+                                                            width: campaign.selected > 0
+                                                                ? `${Math.round((campaign.visited / campaign.selected) * 100)}%`
+                                                                : '0%'
+                                                        }}
                                                     />
                                                 </div>
                                             </div>
@@ -767,34 +826,167 @@ export default function OwnerDashboardPage() {
                             <div>
                                 <h1 className="text-3xl font-black mb-8">메시지</h1>
 
-                                <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden">
-                                    {messages.map((message, idx) => (
-                                        <div
-                                            key={message.id}
-                                            className={`p-4 flex items-center gap-4 hover:bg-gray-50 transition-colors cursor-pointer ${idx !== messages.length - 1 ? 'border-b border-gray-100' : ''
-                                                }`}
-                                        >
-                                            <div className="relative">
-                                                <img
-                                                    src={message.avatar}
-                                                    alt={message.name}
-                                                    className="w-12 h-12 rounded-full"
-                                                />
-                                                {message.unread && (
-                                                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-white" />
-                                                )}
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-center justify-between mb-1">
-                                                    <h3 className="font-bold">{message.name}</h3>
-                                                    <span className="text-xs text-gray-400">{message.time}</span>
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                                    {/* 메시지 목록 */}
+                                    <div className="lg:col-span-1 bg-white rounded-2xl border border-gray-100 overflow-hidden">
+                                        {messages.map((message, idx) => (
+                                            <div
+                                                key={message.id}
+                                                onClick={() => {
+                                                    setSelectedMessage(message);
+                                                    setNewMessageText('');
+                                                }}
+                                                className={`p-4 hover:bg-gray-50 transition-colors cursor-pointer ${idx !== messages.length - 1 ? 'border-b border-gray-100' : ''
+                                                    } ${selectedMessage?.id === message.id ? 'bg-orange-50' : ''}`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className="relative flex-shrink-0">
+                                                        <img
+                                                            src={message.avatar}
+                                                            alt={message.name}
+                                                            className="w-12 h-12 rounded-full"
+                                                        />
+                                                        {message.unread && (
+                                                            <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-white" />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="font-bold truncate">{message.name}</h3>
+                                                        <p className="text-xs text-gray-400 truncate">
+                                                            {message.myReply ? '내가 보낸 메시지' : message.lastMessage}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <p className={`text-sm ${message.unread ? 'font-medium text-gray-900' : 'text-gray-500'}`}>
-                                                    {message.lastMessage}
-                                                </p>
                                             </div>
-                                        </div>
-                                    ))}
+                                        ))}
+                                    </div>
+
+                                    {/* 메시지 대화창 */}
+                                    <div className="lg:col-span-2">
+                                        {selectedMessage ? (
+                                            <div className="bg-white rounded-2xl border border-gray-100 flex flex-col h-[600px]">
+                                                {/* 헤더 */}
+                                                <div className="p-4 border-b border-gray-100 flex items-center gap-3">
+                                                    <img
+                                                        src={selectedMessage.avatar}
+                                                        alt={selectedMessage.name}
+                                                        className="w-10 h-10 rounded-full"
+                                                    />
+                                                    <div>
+                                                        <h3 className="font-bold">{selectedMessage.name}</h3>
+                                                        <p className="text-xs text-gray-400">활성</p>
+                                                    </div>
+                                                </div>
+
+                                                {/* 메시지 내용 */}
+                                                <div className="flex-1 p-6 overflow-y-auto space-y-4">
+                                                    {/* 받은 메시지 */}
+                                                    <div className="flex justify-start">
+                                                        <div>
+                                                            <div className="inline-block bg-gray-100 rounded-2xl rounded-tl-sm px-4 py-3 max-w-md">
+                                                                <p className="text-sm text-gray-900">
+                                                                    {selectedMessage.lastMessage}
+                                                                </p>
+                                                            </div>
+                                                            <p className="text-xs text-gray-400 mt-1 ml-1">
+                                                                {selectedMessage.time}
+                                                            </p>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* 내가 보낸 답장 */}
+                                                    {selectedMessage.myReply && (
+                                                        <div className="flex justify-end">
+                                                            <div>
+                                                                <div className="inline-block bg-orange-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 max-w-md">
+                                                                    <p className="text-sm">
+                                                                        {selectedMessage.myReply}
+                                                                    </p>
+                                                                </div>
+                                                                <p className="text-xs text-gray-400 mt-1 text-right mr-1">
+                                                                    {selectedMessage.repliedAt}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* 메시지 입력창 */}
+                                                <div className="p-4 border-t border-gray-100">
+                                                    <div className="flex gap-3">
+                                                        <input
+                                                            type="text"
+                                                            value={newMessageText}
+                                                            onChange={(e) => setNewMessageText(e.target.value)}
+                                                            onKeyPress={(e) => {
+                                                                if (e.key === 'Enter' && newMessageText.trim()) {
+                                                                    const now = new Date();
+                                                                    const timeString = '방금 전';
+
+                                                                    setMessages(prev => prev.map(msg =>
+                                                                        msg.id === selectedMessage.id
+                                                                            ? {
+                                                                                ...msg,
+                                                                                myReply: newMessageText.trim(),
+                                                                                repliedAt: timeString
+                                                                            }
+                                                                            : msg
+                                                                    ));
+
+                                                                    setSelectedMessage({
+                                                                        ...selectedMessage,
+                                                                        myReply: newMessageText.trim(),
+                                                                        repliedAt: timeString
+                                                                    });
+
+                                                                    setNewMessageText('');
+                                                                }
+                                                            }}
+                                                            placeholder="메시지를 입력하세요..."
+                                                            className="flex-1 px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                                        />
+                                                        <button
+                                                            onClick={() => {
+                                                                if (newMessageText.trim()) {
+                                                                    const now = new Date();
+                                                                    const timeString = '방금 전';
+
+                                                                    setMessages(prev => prev.map(msg =>
+                                                                        msg.id === selectedMessage.id
+                                                                            ? {
+                                                                                ...msg,
+                                                                                myReply: newMessageText.trim(),
+                                                                                repliedAt: timeString
+                                                                            }
+                                                                            : msg
+                                                                    ));
+
+                                                                    setSelectedMessage({
+                                                                        ...selectedMessage,
+                                                                        myReply: newMessageText.trim(),
+                                                                        repliedAt: timeString
+                                                                    });
+
+                                                                    setNewMessageText('');
+                                                                }
+                                                            }}
+                                                            className="px-6 py-3 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                                                            disabled={!newMessageText.trim()}
+                                                        >
+                                                            전송
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="bg-white rounded-2xl border border-gray-100 h-[600px] flex items-center justify-center">
+                                                <div className="text-center">
+                                                    <div className="text-6xl mb-4">💬</div>
+                                                    <p className="text-gray-400">메시지를 선택하세요</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -946,8 +1138,8 @@ export default function OwnerDashboardPage() {
                                                 type="button"
                                                 onClick={() => setModalOfferType('menu')}
                                                 className={`p-4 border-2 rounded-xl transition-all ${modalOfferType === 'menu'
-                                                        ? 'border-orange-500 bg-orange-50'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-orange-500 bg-orange-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="text-2xl mb-1">🍽️</div>
@@ -957,8 +1149,8 @@ export default function OwnerDashboardPage() {
                                                 type="button"
                                                 onClick={() => setModalOfferType('discount')}
                                                 className={`p-4 border-2 rounded-xl transition-all ${modalOfferType === 'discount'
-                                                        ? 'border-orange-500 bg-orange-50'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-orange-500 bg-orange-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="text-2xl mb-1">💰</div>
@@ -968,8 +1160,8 @@ export default function OwnerDashboardPage() {
                                                 type="button"
                                                 onClick={() => setModalOfferType('free')}
                                                 className={`p-4 border-2 rounded-xl transition-all ${modalOfferType === 'free'
-                                                        ? 'border-orange-500 bg-orange-50'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-orange-500 bg-orange-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="text-2xl mb-1">🎁</div>
@@ -1038,8 +1230,8 @@ export default function OwnerDashboardPage() {
                                                 type="button"
                                                 onClick={() => setModalPlatform('instagram')}
                                                 className={`flex-1 p-3 border-2 rounded-xl transition-all ${modalPlatform === 'instagram'
-                                                        ? 'border-orange-500 bg-orange-50'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-orange-500 bg-orange-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="text-xl mb-1">📸</div>
@@ -1049,8 +1241,8 @@ export default function OwnerDashboardPage() {
                                                 type="button"
                                                 onClick={() => setModalPlatform('blog')}
                                                 className={`flex-1 p-3 border-2 rounded-xl transition-all ${modalPlatform === 'blog'
-                                                        ? 'border-orange-500 bg-orange-50'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-orange-500 bg-orange-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="text-xl mb-1">✍️</div>
@@ -1060,8 +1252,8 @@ export default function OwnerDashboardPage() {
                                                 type="button"
                                                 onClick={() => setModalPlatform('youtube')}
                                                 className={`flex-1 p-3 border-2 rounded-xl transition-all ${modalPlatform === 'youtube'
-                                                        ? 'border-orange-500 bg-orange-50'
-                                                        : 'border-gray-200 hover:border-gray-300'
+                                                    ? 'border-orange-500 bg-orange-50'
+                                                    : 'border-gray-200 hover:border-gray-300'
                                                     }`}
                                             >
                                                 <div className="text-xl mb-1">🎥</div>
@@ -1131,10 +1323,10 @@ export default function OwnerDashboardPage() {
                                                 )}
                                             </div>
                                             <span className={`px-3 py-1 rounded-full text-xs font-bold ${applicant.status === '승인됨'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : applicant.status === '거절됨'
-                                                        ? 'bg-red-100 text-red-700'
-                                                        : 'bg-yellow-100 text-yellow-700'
+                                                ? 'bg-green-100 text-green-700'
+                                                : applicant.status === '거절됨'
+                                                    ? 'bg-red-100 text-red-700'
+                                                    : 'bg-yellow-100 text-yellow-700'
                                                 }`}>
                                                 {applicant.status}
                                             </span>

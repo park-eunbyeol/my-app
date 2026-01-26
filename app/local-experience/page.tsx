@@ -217,8 +217,8 @@ export default function OwnerDashboardPage() {
             spots: 5,
             visited: 0,
             reviewed: 0,
-            deadline: "2024.02.15",
-            daysLeft: -3,
+            deadline: "2026.02.05",
+            daysLeft: 10,
             avgRating: 4.5
         },
         {
@@ -230,8 +230,8 @@ export default function OwnerDashboardPage() {
             spots: 5,
             visited: 0,
             reviewed: 0,
-            deadline: "2024.02.28",
-            daysLeft: 7
+            deadline: "2026.02.10",
+            daysLeft: 15
         },
         {
             id: 3,
@@ -242,8 +242,8 @@ export default function OwnerDashboardPage() {
             spots: 8,
             visited: 0,
             reviewed: 0,
-            deadline: "2024.03.05",
-            daysLeft: 11
+            deadline: "2026.02.20",
+            daysLeft: 25
         }
     ];
 
@@ -272,13 +272,25 @@ export default function OwnerDashboardPage() {
         }
     }, [campaigns]);
 
-    // Update campaigns with dynamic applicant counts
+    // Calculate days left until deadline
+    const calculateDaysLeft = (deadline: string): number => {
+        const deadlineDate = new Date(deadline.replace(/\./g, '-'));
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        deadlineDate.setHours(0, 0, 0, 0);
+        const diffTime = deadlineDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
+    };
+
+    // Update campaigns with dynamic applicant counts and recalculated daysLeft
     const campaignsWithCounts = campaigns.map(campaign => ({
         ...campaign,
         applications: getCampaignApplicants(campaign.id).length,
         selected: getApprovedApplicants(campaign.id).length,
         visited: getApprovedApplicants(campaign.id).length,
         reviewed: getApprovedWithReviews(campaign.id).length,
+        daysLeft: calculateDaysLeft(campaign.deadline),
     }));
 
     const handleCreateCampaign = () => {
@@ -811,11 +823,87 @@ export default function OwnerDashboardPage() {
                                     </div>
                                 </div>
 
-                                {/* Chart Placeholder */}
+                                {/* Monthly Performance Chart */}
                                 <div className="bg-white rounded-2xl border border-gray-100 p-6">
-                                    <h2 className="text-xl font-black mb-4">월별 성과 추이</h2>
-                                    <div className="h-64 bg-gray-50 rounded-xl flex items-center justify-center text-gray-400">
-                                        📊 차트 영역 (Chart.js 등으로 구현)
+                                    <h2 className="text-xl font-black mb-6">월별 성과 추이</h2>
+
+                                    {/* Chart Legend */}
+                                    <div className="flex gap-6 mb-6 justify-center">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-4 h-4 bg-orange-500 rounded"></div>
+                                            <span className="text-sm text-gray-600">신청자</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-4 h-4 bg-blue-500 rounded"></div>
+                                            <span className="text-sm text-gray-600">선발</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-4 h-4 bg-green-500 rounded"></div>
+                                            <span className="text-sm text-gray-600">리뷰</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Chart */}
+                                    <div className="relative h-64">
+                                        {/* Y-axis labels */}
+                                        <div className="absolute left-0 top-0 bottom-8 flex flex-col justify-between text-xs text-gray-400">
+                                            <span>20</span>
+                                            <span>15</span>
+                                            <span>10</span>
+                                            <span>5</span>
+                                            <span>0</span>
+                                        </div>
+
+                                        {/* Chart area */}
+                                        <div className="ml-8 h-full flex items-end justify-around gap-2 border-b border-l border-gray-200 pb-8 pr-4">
+                                            {/* October */}
+                                            <div className="flex-1 flex flex-col items-center gap-2">
+                                                <div className="w-full flex gap-1 items-end justify-center h-48">
+                                                    <div className="w-1/3 bg-orange-500 rounded-t transition-all hover:opacity-80" style={{ height: '60%' }} title="신청자: 12명"></div>
+                                                    <div className="w-1/3 bg-blue-500 rounded-t transition-all hover:opacity-80" style={{ height: '50%' }} title="선발: 10명"></div>
+                                                    <div className="w-1/3 bg-green-500 rounded-t transition-all hover:opacity-80" style={{ height: '40%' }} title="리뷰: 8개"></div>
+                                                </div>
+                                                <span className="text-xs text-gray-500 font-medium">10월</span>
+                                            </div>
+
+                                            {/* November */}
+                                            <div className="flex-1 flex flex-col items-center gap-2">
+                                                <div className="w-full flex gap-1 items-end justify-center h-48">
+                                                    <div className="w-1/3 bg-orange-500 rounded-t transition-all hover:opacity-80" style={{ height: '75%' }} title="신청자: 15명"></div>
+                                                    <div className="w-1/3 bg-blue-500 rounded-t transition-all hover:opacity-80" style={{ height: '60%' }} title="선발: 12명"></div>
+                                                    <div className="w-1/3 bg-green-500 rounded-t transition-all hover:opacity-80" style={{ height: '55%' }} title="리뷰: 11개"></div>
+                                                </div>
+                                                <span className="text-xs text-gray-500 font-medium">11월</span>
+                                            </div>
+
+                                            {/* December */}
+                                            <div className="flex-1 flex flex-col items-center gap-2">
+                                                <div className="w-full flex gap-1 items-end justify-center h-48">
+                                                    <div className="w-1/3 bg-orange-500 rounded-t transition-all hover:opacity-80" style={{ height: '90%' }} title="신청자: 18명"></div>
+                                                    <div className="w-1/3 bg-blue-500 rounded-t transition-all hover:opacity-80" style={{ height: '75%' }} title="선발: 15명"></div>
+                                                    <div className="w-1/3 bg-green-500 rounded-t transition-all hover:opacity-80" style={{ height: '70%' }} title="리뷰: 14개"></div>
+                                                </div>
+                                                <span className="text-xs text-gray-500 font-medium">12월</span>
+                                            </div>
+
+                                            {/* January */}
+                                            <div className="flex-1 flex flex-col items-center gap-2">
+                                                <div className="w-full flex gap-1 items-end justify-center h-48">
+                                                    <div className="w-1/3 bg-orange-500 rounded-t transition-all hover:opacity-80" style={{ height: '65%' }} title="신청자: 13명"></div>
+                                                    <div className="w-1/3 bg-blue-500 rounded-t transition-all hover:opacity-80" style={{ height: '50%' }} title="선발: 10명"></div>
+                                                    <div className="w-1/3 bg-green-500 rounded-t transition-all hover:opacity-80" style={{ height: '35%' }} title="리뷰: 7개"></div>
+                                                </div>
+                                                <span className="text-xs text-gray-500 font-medium">1월</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Chart insights */}
+                                    <div className="mt-6 p-4 bg-orange-50 rounded-xl">
+                                        <p className="text-sm text-gray-700">
+                                            <span className="font-bold text-orange-600">📈 인사이트:</span> 12월에 가장 높은 성과를 기록했으며,
+                                            신청자 대비 리뷰 작성률이 평균 <span className="font-bold">77.8%</span>로 매우 우수합니다!
+                                        </p>
                                     </div>
                                 </div>
                             </div>

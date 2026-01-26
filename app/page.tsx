@@ -65,6 +65,18 @@ export default function CoffeeShopLanding() {
   const [isInitialAuthCheckDone, setIsInitialAuthCheckDone] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Chatbot states
+  const [showChatbot, setShowChatbot] = useState(false);
+  const [chatStep, setChatStep] = useState(0);
+  const [chatData, setChatData] = useState({
+    visitors: '',
+    customerAge: '',
+    currentMarketing: '',
+    mainConcern: ''
+  });
+  const [messages, setMessages] = useState<Array<{ text: string; isBot: boolean; options?: string[] }>>([]);
+  const [recommendedPlan, setRecommendedPlan] = useState<string | null>(null);
+
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50);
     window.addEventListener('scroll', handleScroll);
@@ -453,6 +465,75 @@ export default function CoffeeShopLanding() {
         return updatedErrors;
       });
     }
+  };
+
+  // Chatbot handlers
+  const initChatbot = () => {
+    setShowChatbot(true);
+    setChatStep(0);
+    setMessages([
+      { text: '안녕하세요! 카페드림 진단 도우미입니다 ☕', isBot: true },
+      { text: '사장님의 카페 상황을 파악하여 최적의 마케팅 솔루션을 추천해드릴게요!', isBot: true },
+      { text: '월 평균 방문객 수는 얼마나 되시나요?', isBot: true, options: ['100명 미만', '100-300명', '300명 이상'] }
+    ]);
+  };
+
+  const handleChatOption = (option: string, field: keyof typeof chatData) => {
+    setChatData(prev => ({ ...prev, [field]: option }));
+    setMessages(prev => [...prev, { text: option, isBot: false }]);
+
+    setTimeout(() => {
+      if (chatStep === 0) {
+        setMessages(prev => [...prev,
+        { text: '주요 고객층은 어느 연령대인가요?', isBot: true, options: ['20대', '30대', '40대 이상'] }
+        ]);
+        setChatStep(1);
+      } else if (chatStep === 1) {
+        setMessages(prev => [...prev,
+        { text: '현재 마케팅 활동을 하고 계신가요?', isBot: true, options: ['없음', 'SNS만 운영', '광고 진행 중'] }
+        ]);
+        setChatStep(2);
+      } else if (chatStep === 2) {
+        setMessages(prev => [...prev,
+        { text: '가장 큰 고민은 무엇인가요?', isBot: true, options: ['신규 고객 유입', '재방문율 향상', '관리 시간 부족'] }
+        ]);
+        setChatStep(3);
+      } else if (chatStep === 3) {
+        // Calculate recommendation
+        const plan = getRecommendedPlan({ ...chatData, mainConcern: option });
+        setRecommendedPlan(plan);
+        setMessages(prev => [...prev,
+        { text: '진단이 완료되었습니다! 🎉', isBot: true },
+        { text: `사장님께 추천드리는 플랜은 "${plan}" 입니다.`, isBot: true }
+        ]);
+        setChatStep(4);
+      }
+    }, 500);
+  };
+
+  const getRecommendedPlan = (data: typeof chatData) => {
+    const { visitors, currentMarketing, mainConcern } = data;
+
+    // 방문객 100명 미만 + 마케팅 없음 → 베이직
+    if (visitors === '100명 미만' && currentMarketing === '없음') {
+      return '베이직';
+    }
+
+    // 방문객 300명 이상 + 재방문율/단골 관리 → 프리미엄
+    if (visitors === '300명 이상' || mainConcern === '재방문율 향상') {
+      return '프리미엄';
+    }
+
+    // 그 외 대부분 → 프로
+    return '프로';
+  };
+
+  const resetChatbot = () => {
+    setChatStep(0);
+    setChatData({ visitors: '', customerAge: '', currentMarketing: '', mainConcern: '' });
+    setMessages([]);
+    setRecommendedPlan(null);
+    setShowChatbot(false);
   };
 
   return (
@@ -1355,6 +1436,120 @@ export default function CoffeeShopLanding() {
                 </form>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Chatbot Floating Button */}
+      {!showChatbot && (
+        <button
+          onClick={initChatbot}
+          className="fixed bottom-8 right-8 z-50 w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-amber-600 to-amber-700 rounded-full shadow-2xl hover:scale-110 transition-all duration-300 flex items-center justify-center group animate-bounce"
+          aria-label="챗봇 열기"
+        >
+          <span className="text-3xl md:text-4xl">💬</span>
+          <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-black animate-pulse">
+            New
+          </span>
+        </button>
+      )}
+
+      {/* Chatbot Window */}
+      {showChatbot && (
+        <div className="fixed bottom-8 right-8 z-50 w-[90vw] md:w-[400px] h-[600px] bg-white rounded-[2rem] shadow-2xl flex flex-col animate-fadeIn border border-gray-100">
+          {/* Chat Header */}
+          <div className="p-6 border-b border-gray-100 bg-gradient-to-r from-amber-600 to-amber-700 rounded-t-[2rem] flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                <span className="text-2xl">☕</span>
+              </div>
+              <div>
+                <h3 className="font-black text-white">카페드림 진단</h3>
+                <p className="text-xs text-white/80">맞춤 솔루션 추천</p>
+              </div>
+            </div>
+            <button
+              onClick={resetChatbot}
+              className="text-white/80 hover:text-white text-2xl transition-colors"
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="px-6 py-3 bg-amber-50 border-b border-amber-100">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-bold text-amber-900">진행률</span>
+              <span className="text-xs text-amber-600 font-black">{Math.min(chatStep, 4)}/4</span>
+            </div>
+            <div className="w-full h-2 bg-amber-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-amber-500 to-amber-600 transition-all duration-500 rounded-full"
+                style={{ width: `${(Math.min(chatStep, 4) / 4) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Chat Messages */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`flex ${msg.isBot ? 'justify-start' : 'justify-end'}`}>
+                <div className={`max-w-[80%] ${msg.isBot ? 'bg-gray-100' : 'bg-amber-600 text-white'} rounded-2xl px-4 py-3`}>
+                  <p className={`text-sm font-medium ${msg.isBot ? 'text-gray-900' : 'text-white'}`}>
+                    {msg.text}
+                  </p>
+                  {msg.options && (
+                    <div className="mt-3 space-y-2">
+                      {msg.options.map((option, optIdx) => (
+                        <button
+                          key={optIdx}
+                          onClick={() => {
+                            const fields: Array<keyof typeof chatData> = ['visitors', 'customerAge', 'currentMarketing', 'mainConcern'];
+                            handleChatOption(option, fields[chatStep]);
+                          }}
+                          className="w-full px-4 py-2 bg-white border-2 border-amber-200 rounded-xl text-sm font-bold text-gray-900 hover:bg-amber-50 hover:border-amber-400 transition-all"
+                        >
+                          {option}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {/* Recommendation Result */}
+            {chatStep === 4 && recommendedPlan && (
+              <div className="mt-6 p-6 bg-gradient-to-br from-amber-50 to-orange-50 rounded-2xl border-2 border-amber-200">
+                <div className="text-center mb-4">
+                  <div className="text-4xl mb-3">🎯</div>
+                  <h4 className="text-xl font-black text-amber-900 mb-2">추천 플랜</h4>
+                  <p className="text-3xl font-black text-amber-600">{recommendedPlan}</p>
+                </div>
+                <div className="space-y-2 mb-4 text-sm text-gray-700">
+                  <p className="font-medium">✓ 사장님의 상황에 최적화된 솔루션</p>
+                  <p className="font-medium">✓ 즉시 시작 가능한 마케팅 전략</p>
+                  <p className="font-medium">✓ 1개월 무료 체험 제공</p>
+                </div>
+                <button
+                  onClick={() => {
+                    openSubscriptionModal(recommendedPlan, 'chatbot_recommendation');
+                    resetChatbot();
+                  }}
+                  className="w-full py-3 bg-amber-600 text-white rounded-xl font-black hover:bg-amber-700 transition-all shadow-lg"
+                >
+                  {recommendedPlan} 플랜 신청하기
+                </button>
+                <button
+                  onClick={() => {
+                    initChatbot();
+                  }}
+                  className="w-full mt-2 py-2 text-amber-600 text-sm font-bold hover:text-amber-800 transition-colors"
+                >
+                  다시 진단받기
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}

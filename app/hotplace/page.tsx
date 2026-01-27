@@ -808,13 +808,13 @@ export default function HotPlacePage(props: {
                     )
                 }
 
-                {/* Immersive Reels Modal - Split View for PC */}
+                {/* Immersive Reels Modal - Full Screen Mobile, Split View Desktop */}
                 {
                     isReelsOpen && (
-                        <div className="fixed inset-0 z-[130] bg-[#1A110D]/95 backdrop-blur-2xl flex items-center justify-center animate-fadeInFast p-4 lg:p-12 overflow-hidden">
-                            <div className="relative w-full max-w-6xl h-full flex flex-col lg:flex-row bg-black rounded-[40px] overflow-hidden shadow-3xl">
-                                {/* Left: Video Section */}
-                                <div className="flex-1 relative bg-black flex items-center justify-center order-1 lg:order-1">
+                        <div className="fixed inset-0 z-[130] bg-black flex items-center justify-center animate-fadeInFast overflow-hidden">
+                            <div className="relative w-full h-full lg:max-w-6xl lg:h-full flex flex-col lg:flex-row lg:bg-black lg:rounded-[40px] overflow-hidden shadow-3xl">
+                                {/* Video Section - Full screen on mobile */}
+                                <div className="flex-1 relative bg-black flex items-center justify-center">
                                     {!hasVideoError ? (
                                         <video
                                             key={reels[currentReelIndex].video}
@@ -831,7 +831,7 @@ export default function HotPlacePage(props: {
                                                 setHasVideoError(true);
                                                 setIsVideoLoading(false);
                                             }}
-                                            className="h-full w-auto max-w-full object-contain"
+                                            className="h-full w-full object-cover"
                                         />
                                     ) : (
                                         <div className="w-full h-full relative">
@@ -846,28 +846,79 @@ export default function HotPlacePage(props: {
                                         </div>
                                     )}
 
-                                    {/* Controls Overlay */}
-                                    <div className="absolute top-8 left-8 flex items-center gap-4 z-20">
-                                        <button onClick={() => setIsReelsOpen(false)} className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-orange-600 transition-all shadow-xl">
-                                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                                    {/* Top Controls */}
+                                    <div className="absolute top-4 left-4 lg:top-8 lg:left-8 flex items-center gap-3 z-20">
+                                        <button onClick={() => setIsReelsOpen(false)} className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl lg:rounded-2xl bg-black/40 lg:bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-orange-600 transition-all shadow-xl">
+                                            <svg className="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
                                         </button>
-                                        <h3 className="text-white font-black text-lg tracking-tight px-4 py-2 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 hidden sm:block">핫플레이스 릴스</h3>
+                                        <h3 className="text-white font-black text-sm lg:text-lg tracking-tight px-3 py-1.5 lg:px-4 lg:py-2 bg-black/40 lg:bg-white/10 backdrop-blur-md rounded-xl lg:rounded-2xl border border-white/10">핫플레이스 릴스</h3>
                                     </div>
 
+                                    {/* Mobile Bottom Info Overlay */}
+                                    <div className="absolute bottom-0 left-0 right-0 z-20 lg:hidden p-6 pb-8 bg-gradient-to-t from-black via-black/80 to-transparent">
+                                        <div className="flex items-start justify-between mb-4">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center font-black text-white text-sm">
+                                                    {reels[currentReelIndex].user[1]}
+                                                </div>
+                                                <div>
+                                                    <p className="font-black text-sm text-white leading-tight mb-0.5">{reels[currentReelIndex].user}</p>
+                                                    <p className="text-[10px] text-orange-400 font-bold">인사이트 작성자</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="mb-4">
+                                            <div className="flex items-center gap-2 mb-2">
+                                                <span className="text-base">📍</span>
+                                                <span className="font-black text-base text-white">{reels[currentReelIndex].location}</span>
+                                            </div>
+                                            <p className="text-xs text-white/90 leading-relaxed line-clamp-2">
+                                                {reels[currentReelIndex].desc}
+                                            </p>
+                                        </div>
+                                        {/* Mobile Navigation */}
+                                        <div className="flex items-center justify-between">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setCurrentReelIndex(prev => (prev - 1 + reels.length) % reels.length);
+                                                }}
+                                                className="text-white/70 hover:text-white transition-colors text-sm font-bold px-4 py-2"
+                                            >
+                                                ← 이전
+                                            </button>
+                                            <div className="flex gap-1.5">
+                                                {reels.map((_, i) => (
+                                                    <div key={i} className={`h-1.5 rounded-full transition-all ${i === currentReelIndex ? 'bg-orange-500 w-6' : 'bg-white/30 w-1.5'}`} />
+                                                ))}
+                                            </div>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setCurrentReelIndex(prev => (prev + 1) % reels.length);
+                                                }}
+                                                className="text-white font-black hover:text-orange-400 transition-colors text-sm px-4 py-2"
+                                            >
+                                                다음 →
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* Mute Button */}
                                     <button
                                         onClick={() => {
                                             setIsMuted(!isMuted);
                                             setShowMuteFeedback(true);
                                             setTimeout(() => setShowMuteFeedback(false), 1000);
                                         }}
-                                        className="absolute bottom-10 right-10 w-14 h-14 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-all z-20"
+                                        className="absolute bottom-6 right-6 lg:bottom-10 lg:right-10 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-black/40 lg:bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition-all z-20 text-xl lg:text-2xl"
                                     >
                                         {isMuted ? '🔇' : '🔊'}
                                     </button>
                                 </div>
 
-                                {/* Right: Info Section (Deep Look for PC) */}
-                                <div className="w-full lg:w-[450px] bg-white lg:order-2 flex flex-col h-full text-[#1A110D]">
+                                {/* Desktop Info Panel - Hidden on mobile */}
+                                <div className="hidden lg:flex lg:w-[450px] bg-white flex-col h-full text-[#1A110D]">
                                     <div className="p-10 flex-1 overflow-y-auto custom-scrollbar">
                                         <div className="flex items-center justify-between mb-8">
                                             <div className="flex items-center gap-4">

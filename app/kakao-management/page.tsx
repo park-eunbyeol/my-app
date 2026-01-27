@@ -250,12 +250,13 @@ export default function KakaoManagementPage() {
         <div className="min-h-screen bg-[#FAFAFA] text-[#1A110D] font-sans">
             {/* Navigation */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <Link href="/" className="text-xl font-bold tracking-tighter hover:opacity-70 transition-opacity">
+                <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+                    <Link href="/" className="text-lg md:text-xl font-bold tracking-tighter hover:opacity-70 transition-opacity">
                         ☕ CAFÉ DREAM
                     </Link>
-                    <div className="flex items-center gap-6">
-                        <span className="text-sm font-medium text-gray-500">카카오 채널 관리</span>
+                    <div className="flex items-center gap-3 md:gap-6">
+                        <span className="hidden md:inline text-sm font-medium text-gray-500">카카오 채널 관리</span>
+                        <span className="md:hidden text-sm font-medium text-gray-500">카카오 관리</span>
                     </div>
                 </div>
             </nav>
@@ -342,16 +343,16 @@ export default function KakaoManagementPage() {
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1 p-6 md:p-10">
+                <main className="flex-1 p-4 md:p-6 lg:p-10 pb-24 md:pb-10">
                     <div className="max-w-6xl mx-auto">
                         {/* Overview Tab */}
                         {activeTab === 'overview' && (
                             <div>
-                                <h1 className="text-3xl font-black mb-8">카카오톡 채널 대시보드</h1>
+                                <h1 className="text-2xl md:text-3xl font-black mb-6 md:mb-8">카카오톡 채널 대시보드</h1>
 
                                 {/* Stats Cards */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                                    <div className="bg-white p-6 rounded-2xl border border-gray-100">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+                                    <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-100">
                                         <p className="text-xs text-gray-400 mb-2">채널 팔로워</p>
                                         <p className="text-3xl font-black text-yellow-600">{stats.channelFollowers.toLocaleString()}</p>
                                     </div>
@@ -435,7 +436,7 @@ export default function KakaoManagementPage() {
                         {/* Reservations Tab */}
                         {activeTab === 'reservations' && (
                             <div>
-                                <h1 className="text-3xl font-black mb-8">예약 관리</h1>
+                                <h1 className="text-2xl md:text-3xl font-black mb-6 md:mb-8">예약 관리</h1>
 
                                 <div className="space-y-4">
                                     {reservations.map((reservation) => (
@@ -514,7 +515,7 @@ export default function KakaoManagementPage() {
                         {/* Messages Tab */}
                         {activeTab === 'messages' && (
                             <div>
-                                <h1 className="text-3xl font-black mb-8">메시지 발송</h1>
+                                <h1 className="text-2xl md:text-3xl font-black mb-6 md:mb-8">메시지 발송</h1>
 
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                                     {/* Message Sending Form */}
@@ -530,8 +531,8 @@ export default function KakaoManagementPage() {
                                                         key={template.id}
                                                         onClick={() => handleSelectTemplate(template.id)}
                                                         className={`p-3 border-2 rounded-xl text-left transition-all ${selectedTemplateId === template.id
-                                                                ? 'border-yellow-500 bg-yellow-50'
-                                                                : 'border-gray-200 hover:border-gray-300'
+                                                            ? 'border-yellow-500 bg-yellow-50'
+                                                            : 'border-gray-200 hover:border-gray-300'
                                                             }`}
                                                     >
                                                         <p className="text-xs font-bold text-gray-700">{template.name}</p>
@@ -571,8 +572,8 @@ export default function KakaoManagementPage() {
                                                 onClick={handleSendMessage}
                                                 disabled={!isChannelConnected || isSending}
                                                 className={`w-full px-6 py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${isChannelConnected && !isSending
-                                                        ? 'bg-yellow-600 text-white hover:bg-yellow-700'
-                                                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                                    ? 'bg-yellow-600 text-white hover:bg-yellow-700'
+                                                    : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                                     }`}
                                             >
                                                 {isSending ? (
@@ -667,7 +668,7 @@ export default function KakaoManagementPage() {
                         {/* Templates Tab */}
                         {activeTab === 'templates' && (
                             <div>
-                                <h1 className="text-3xl font-black mb-8">템플릿 관리</h1>
+                                <h1 className="text-2xl md:text-3xl font-black mb-6 md:mb-8">템플릿 관리</h1>
 
                                 <div className="space-y-4">
                                     {templates.map((template) => (
@@ -716,7 +717,7 @@ export default function KakaoManagementPage() {
                         {/* Settings Tab */}
                         {activeTab === 'settings' && (
                             <div>
-                                <h1 className="text-3xl font-black mb-8">설정</h1>
+                                <h1 className="text-2xl md:text-3xl font-black mb-6 md:mb-8">설정</h1>
 
                                 <div className="space-y-6">
                                     <div className="bg-white rounded-2xl border border-gray-100 p-6">
@@ -791,6 +792,66 @@ export default function KakaoManagementPage() {
                     </div>
                 </main>
             </div>
+            {/* Mobile Bottom Navigation */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg pb-safe">
+                <div className="grid grid-cols-5 h-16">
+                    <button
+                        onClick={() => setActiveTab('overview')}
+                        className={`flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'overview'
+                            ? 'text-yellow-600 bg-yellow-50'
+                            : 'text-gray-400 hover:text-gray-600'
+                            }`}
+                    >
+                        <span className="text-xl">📊</span>
+                        <span className="text-[10px] font-bold">대시보드</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('reservations')}
+                        className={`flex flex-col items-center justify-center gap-1 transition-all relative ${activeTab === 'reservations'
+                            ? 'text-yellow-600 bg-yellow-50'
+                            : 'text-gray-400 hover:text-gray-600'
+                            }`}
+                    >
+                        <span className="text-xl">📅</span>
+                        <span className="text-[10px] font-bold">예약</span>
+                        {stats.todayReservations > 0 && (
+                            <span className="absolute top-1 right-4 w-4 h-4 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center font-bold">
+                                {stats.todayReservations}
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('messages')}
+                        className={`flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'messages'
+                            ? 'text-yellow-600 bg-yellow-50'
+                            : 'text-gray-400 hover:text-gray-600'
+                            }`}
+                    >
+                        <span className="text-xl">💌</span>
+                        <span className="text-[10px] font-bold">메시지</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('templates')}
+                        className={`flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'templates'
+                            ? 'text-yellow-600 bg-yellow-50'
+                            : 'text-gray-400 hover:text-gray-600'
+                            }`}
+                    >
+                        <span className="text-xl">📝</span>
+                        <span className="text-[10px] font-bold">템플릿</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('settings')}
+                        className={`flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'settings'
+                            ? 'text-yellow-600 bg-yellow-50'
+                            : 'text-gray-400 hover:text-gray-600'
+                            }`}
+                    >
+                        <span className="text-xl">⚙️</span>
+                        <span className="text-[10px] font-bold">설정</span>
+                    </button>
+                </div>
+            </nav>
         </div>
     );
 }

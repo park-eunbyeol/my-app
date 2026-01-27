@@ -1448,9 +1448,6 @@ export default function CoffeeShopLanding() {
           aria-label="챗봇 열기"
         >
           <span className="text-3xl md:text-4xl">💬</span>
-          <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-black animate-pulse">
-            New
-          </span>
         </button>
       )}
 

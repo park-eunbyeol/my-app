@@ -411,14 +411,14 @@ export default function OwnerDashboardPage() {
         <div className="min-h-screen bg-[#FAFAFA] text-[#1A110D] font-sans">
             {/* Navigation */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-                <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
-                    <Link href="/" className="text-xl font-bold tracking-tighter hover:opacity-70 transition-opacity">
+                <div className="max-w-7xl mx-auto px-4 md:px-6 h-16 flex items-center justify-between">
+                    <Link href="/" className="text-lg md:text-xl font-bold tracking-tighter hover:opacity-70 transition-opacity">
                         ☕ CAFÉ DREAM
                     </Link>
-                    <div className="flex items-center gap-6">
-                        <Link href="/campaigns" className="text-sm font-medium text-gray-500 hover:text-black">내 캠페인</Link>
+                    <div className="flex items-center gap-3 md:gap-6">
+                        <Link href="/campaigns" className="hidden md:block text-sm font-medium text-gray-500 hover:text-black">내 캠페인</Link>
                         <div className="relative">
-                            <button className="text-sm font-medium text-gray-500 hover:text-black">
+                            <button className="text-lg md:text-sm font-medium text-gray-500 hover:text-black">
                                 🔔
                             </button>
                             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center">
@@ -427,9 +427,10 @@ export default function OwnerDashboardPage() {
                         </div>
                         <button
                             onClick={() => setShowCreateModal(true)}
-                            className="px-4 py-2 bg-orange-600 text-white rounded-full text-sm font-bold shadow-lg hover:bg-orange-700 transition-all"
+                            className="px-3 py-2 md:px-4 md:py-2 bg-orange-600 text-white rounded-full text-xs md:text-sm font-bold shadow-lg hover:bg-orange-700 transition-all"
                         >
-                            + 새 체험단
+                            <span className="hidden md:inline">+ 새 체험단</span>
+                            <span className="md:hidden">+</span>
                         </button>
                     </div>
                 </div>
@@ -523,29 +524,29 @@ export default function OwnerDashboardPage() {
                 </aside>
 
                 {/* Main Content */}
-                <main className="flex-1 p-6 md:p-10">
+                <main className="flex-1 p-4 md:p-6 lg:p-10 pb-24 md:pb-10">
                     <div className="max-w-6xl mx-auto">
 
                         {/* Overview Tab */}
                         {activeTab === 'overview' && (
                             <div>
-                                <h1 className="text-3xl font-black mb-8">안녕하세요, 사장님! 👋</h1>
+                                <h1 className="text-2xl md:text-3xl font-black mb-6 md:mb-8">안녕하세요, 사장님! 👋</h1>
 
                                 {/* Quick Stats */}
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                                    <div className="bg-white p-6 rounded-2xl border border-gray-100">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+                                    <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-100">
                                         <p className="text-xs text-gray-400 mb-2">오늘 신청자</p>
-                                        <p className="text-3xl font-black text-orange-600">{dashboardStats.todayApplications}</p>
+                                        <p className="text-2xl md:text-3xl font-black text-orange-600">{dashboardStats.todayApplications}</p>
                                     </div>
-                                    <div className="bg-white p-6 rounded-2xl border border-gray-100">
+                                    <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-100">
                                         <p className="text-xs text-gray-400 mb-2">이번 주 리뷰</p>
                                         <p className="text-3xl font-black text-green-600">{dashboardStats.weeklyReviews}</p>
                                     </div>
-                                    <div className="bg-white p-6 rounded-2xl border border-gray-100">
+                                    <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-100">
                                         <p className="text-xs text-gray-400 mb-2">총 도달수</p>
                                         <p className="text-3xl font-black text-blue-600">{dashboardStats.totalReach}</p>
                                     </div>
-                                    <div className="bg-white p-6 rounded-2xl border border-gray-100">
+                                    <div className="bg-white p-4 md:p-6 rounded-2xl border border-gray-100">
                                         <p className="text-xs text-gray-400 mb-2">예상 재방문</p>
                                         <p className="text-3xl font-black text-purple-600">{dashboardStats.expectedReturns}</p>
                                     </div>
@@ -658,8 +659,8 @@ export default function OwnerDashboardPage() {
                         {/* Campaigns Tab */}
                         {activeTab === 'campaigns' && (
                             <div>
-                                <div className="flex items-center justify-between mb-8">
-                                    <h1 className="text-3xl font-black">캠페인 관리</h1>
+                                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6 md:mb-8">
+                                    <h1 className="text-2xl md:text-3xl font-black">캠페인 관리</h1>
                                     <button
                                         onClick={() => setShowCreateModal(true)}
                                         className="px-6 py-3 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 transition-all"
@@ -670,10 +671,10 @@ export default function OwnerDashboardPage() {
 
                                 <div className="space-y-6">
                                     {campaignsWithCounts.map((campaign) => (
-                                        <div key={campaign.id} className="bg-white rounded-2xl border border-gray-100 p-6">
+                                        <div key={campaign.id} className="bg-white rounded-2xl border border-gray-100 p-4 md:p-6">
                                             <div className="flex items-start justify-between mb-4">
                                                 <div>
-                                                    <h3 className="text-xl font-black mb-2">{campaign.title}</h3>
+                                                    <h3 className="text-lg md:text-xl font-black mb-2">{campaign.title}</h3>
                                                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${campaign.status === '진행중'
                                                         ? 'bg-blue-100 text-blue-700'
                                                         : 'bg-green-100 text-green-700'
@@ -695,10 +696,10 @@ export default function OwnerDashboardPage() {
                                                 </button>
                                             </div>
 
-                                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                                            <div className="grid grid-cols-3 md:grid-cols-5 gap-2 md:gap-4 mb-4">
                                                 <div className="bg-gray-50 p-3 rounded-xl">
                                                     <p className="text-xs text-gray-400 mb-1">신청자</p>
-                                                    <p className="text-xl font-black text-orange-600">{campaign.applications}명</p>
+                                                    <p className="text-base md:text-xl font-black text-orange-600">{campaign.applications}명</p>
                                                 </div>
                                                 <div className="bg-gray-50 p-3 rounded-xl">
                                                     <p className="text-xs text-gray-400 mb-1">선발</p>
@@ -741,13 +742,13 @@ export default function OwnerDashboardPage() {
                                                 </div>
                                             </div>
 
-                                            <div className="flex gap-3">
+                                            <div className="flex flex-col md:flex-row gap-2 md:gap-3">
                                                 <button
                                                     onClick={() => {
                                                         setSelectedCampaign(campaign);
                                                         setShowApplicantsModal(true);
                                                     }}
-                                                    className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-xl font-bold hover:bg-orange-700 transition-colors"
+                                                    className="flex-1 px-4 py-3 bg-orange-600 text-white rounded-xl text-sm md:text-base font-bold hover:bg-orange-700 transition-colors"
                                                 >
                                                     신청자 관리
                                                 </button>
@@ -756,7 +757,7 @@ export default function OwnerDashboardPage() {
                                                         setSelectedCampaign(campaign);
                                                         setShowReviewsModal(true);
                                                     }}
-                                                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl font-bold hover:bg-gray-200 transition-colors"
+                                                    className="flex-1 md:flex-none px-4 py-3 bg-gray-100 text-gray-700 rounded-xl text-sm md:text-base font-bold hover:bg-gray-200 transition-colors"
                                                 >
                                                     리뷰 보기
                                                 </button>
@@ -779,7 +780,7 @@ export default function OwnerDashboardPage() {
                         {/* Analytics Tab */}
                         {activeTab === 'analytics' && (
                             <div>
-                                <h1 className="text-3xl font-black mb-8">분석</h1>
+                                <h1 className="text-2xl md:text-3xl font-black mb-6 md:mb-8">분석</h1>
 
                                 {/* Overall Performance */}
                                 <div className="bg-white rounded-2xl border border-gray-100 p-6 mb-6">
@@ -912,7 +913,7 @@ export default function OwnerDashboardPage() {
                         {/* Messages Tab */}
                         {activeTab === 'messages' && (
                             <div>
-                                <h1 className="text-3xl font-black mb-8">메시지</h1>
+                                <h1 className="text-2xl md:text-3xl font-black mb-6 md:mb-8">메시지</h1>
 
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                                     {/* 메시지 목록 */}
@@ -1082,7 +1083,7 @@ export default function OwnerDashboardPage() {
                         {/* Settings Tab */}
                         {activeTab === 'settings' && (
                             <div>
-                                <h1 className="text-3xl font-black mb-8">설정</h1>
+                                <h1 className="text-2xl md:text-3xl font-black mb-6 md:mb-8">설정</h1>
 
                                 <div className="space-y-6">
                                     {/* Cafe Info */}
@@ -1166,7 +1167,7 @@ export default function OwnerDashboardPage() {
             {/* Create Campaign Modal */}
             {showCreateModal && (
                 <div className="fixed inset-0 z-50 overflow-y-auto">
-                    <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+                    <div className="flex items-center justify-center min-h-screen px-4 py-4 text-center md:p-0">
                         {/* Background overlay */}
                         <div
                             className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"
@@ -1174,20 +1175,20 @@ export default function OwnerDashboardPage() {
                         />
 
                         {/* Modal panel */}
-                        <div className="relative inline-block w-full max-w-4xl px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-3xl shadow-xl sm:my-8 sm:align-middle sm:p-8">
+                        <div className="relative inline-block w-full max-w-4xl px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-2xl md:rounded-3xl shadow-xl md:my-8 md:align-middle md:p-8">
                             {/* Close button */}
                             <button
                                 onClick={() => setShowCreateModal(false)}
-                                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl font-bold"
+                                className="absolute top-3 right-3 md:top-4 md:right-4 text-gray-400 hover:text-gray-600 text-xl md:text-2xl font-bold z-10"
                             >
                                 ✕
                             </button>
 
                             {/* Modal content - Simplified form */}
                             <div>
-                                <h2 className="text-3xl font-black mb-6">새 체험단 만들기</h2>
+                                <h2 className="text-xl md:text-3xl font-black mb-4 md:mb-6">새 체험단 만들기</h2>
 
-                                <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-2">
+                                <div className="space-y-4 md:space-y-6 max-h-[70vh] overflow-y-auto pr-2">
                                     {/* Campaign Title */}
                                     <div>
                                         <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -1681,6 +1682,72 @@ export default function OwnerDashboardPage() {
                     </div>
                 </div>
             )}
+
+            {/* Mobile Bottom Navigation - Hidden on Desktop */}
+            <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-lg pb-safe">
+                <div className="grid grid-cols-5 h-16">
+                    <button
+                        onClick={() => setActiveTab('overview')}
+                        className={`flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'overview'
+                            ? 'text-orange-600 bg-orange-50'
+                            : 'text-gray-400 hover:text-gray-600'
+                            }`}
+                    >
+                        <span className="text-xl">📊</span>
+                        <span className="text-[10px] font-bold">대시보드</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('campaigns')}
+                        className={`flex flex-col items-center justify-center gap-1 transition-all relative ${activeTab === 'campaigns'
+                            ? 'text-orange-600 bg-orange-50'
+                            : 'text-gray-400 hover:text-gray-600'
+                            }`}
+                    >
+                        <span className="text-xl">📋</span>
+                        <span className="text-[10px] font-bold">캠페인</span>
+                        {dashboardStats.pendingApprovals > 0 && (
+                            <span className="absolute top-1 right-4 w-4 h-4 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center font-bold">
+                                {dashboardStats.pendingApprovals}
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('analytics')}
+                        className={`flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'analytics'
+                            ? 'text-orange-600 bg-orange-50'
+                            : 'text-gray-400 hover:text-gray-600'
+                            }`}
+                    >
+                        <span className="text-xl">📈</span>
+                        <span className="text-[10px] font-bold">분석</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('messages')}
+                        className={`flex flex-col items-center justify-center gap-1 transition-all relative ${activeTab === 'messages'
+                            ? 'text-orange-600 bg-orange-50'
+                            : 'text-gray-400 hover:text-gray-600'
+                            }`}
+                    >
+                        <span className="text-xl">💬</span>
+                        <span className="text-[10px] font-bold">메시지</span>
+                        {messages.filter(m => m.unread).length > 0 && (
+                            <span className="absolute top-1 right-4 w-4 h-4 bg-red-500 rounded-full text-white text-[8px] flex items-center justify-center font-bold">
+                                {messages.filter(m => m.unread).length}
+                            </span>
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('settings')}
+                        className={`flex flex-col items-center justify-center gap-1 transition-all ${activeTab === 'settings'
+                            ? 'text-orange-600 bg-orange-50'
+                            : 'text-gray-400 hover:text-gray-600'
+                            }`}
+                    >
+                        <span className="text-xl">⚙️</span>
+                        <span className="text-[10px] font-bold">설정</span>
+                    </button>
+                </div>
+            </nav>
         </div>
     );
 }

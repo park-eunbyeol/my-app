@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "카페드림 - 사장님의 여유를 위한 카페 마케팅 전문가",
   description: "네이버 플레이스, 인스타그램, CRM까지 카페 매출의 모든 솔루션을 제공합니다.",
+  metadataBase: new URL('https://my-app-omega-fawn-50.vercel.app'),
   openGraph: {
     title: "카페드림 - 사장님의 여유를 위한 카페 마케팅 전문가",
     description: "텅 빈 테이블을 웨이팅 라인으로 만드는 단골 마케팅의 정석. 지도 노출부터 단골 관리까지, 사장님은 커피만 내리세요.",

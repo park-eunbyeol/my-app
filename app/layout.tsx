@@ -14,7 +14,7 @@ export const metadata: Metadata = {
     description: "텅 빈 테이블을 웨이팅 라인으로 만드는 단골 마케팅의 정석. 지도 노출부터 단골 관리까지, 사장님은 커피만 내리세요.",
     images: [
       {
-        url: "/og-image.png",
+        url: `/og-image.png?v=${Date.now()}`,
         width: 1200,
         height: 630,
         alt: "카페드림 - 카페 마케팅 전문가",
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "카페드림 - 사장님의 여유를 위한 카페 마케팅 전문가",
     description: "텅 빈 테이블을 웨이팅 라인으로 만드는 단골 마케팅의 정석",
-    images: ["/og-image.png"],
+    images: [`/og-image.png?v=${Date.now()}`],
   },
 };
 
